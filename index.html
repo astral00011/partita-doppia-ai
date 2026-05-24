@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+from pathlib import Path
+html = '''<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
@@ -8,207 +9,25 @@
   <meta http-equiv="expires" content="0" />
   <title>AI Partita Doppia</title>
   <style>
-    :root{
-      --bg:#07111f;
-      --panel:#0f172a;
-      --panel2:#111c33;
-      --text:#e5e7eb;
-      --muted:#94a3b8;
-      --line:#22304a;
-      --accent:#38bdf8;
-      --accent2:#2563eb;
-      --danger:#ef4444;
-      --success:#22c55e;
-      --warn:#f59e0b;
-    }
+    :root{--bg:#07111f;--panel:#0f172a;--panel2:#111c33;--text:#e5e7eb;--muted:#94a3b8;--line:#22304a;--accent:#38bdf8;--accent2:#2563eb;--danger:#ef4444;--success:#22c55e;--warn:#f59e0b}
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-      background:
-        radial-gradient(circle at top,rgba(56,189,248,.14),transparent 32%),
-        linear-gradient(180deg,#020617 0%,var(--bg) 100%);
-      color:var(--text);
-    }
-    .wrap{
-      max-width:1400px;
-      margin:0 auto;
-      padding:20px;
-      display:grid;
-      gap:16px;
-    }
-    .hero,.panel{
-      background:rgba(15,23,42,.88);
-      border:1px solid var(--line);
-      border-radius:20px;
-      box-shadow:0 18px 50px rgba(0,0,0,.28);
-    }
-    .hero{
-      padding:24px;
-    }
-    .hero h1{
-      margin:0 0 10px;
-      font-size:clamp(30px,5vw,54px);
-      line-height:1;
-    }
-    .hero p{
-      margin:0;
-      color:var(--muted);
-      line-height:1.7;
-      max-width:84ch;
-    }
-    .grid{
-      display:grid;
-      grid-template-columns:1.15fr .85fr;
-      gap:16px;
-    }
-    .panel{
-      padding:16px;
-    }
-    .section{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      margin-bottom:12px;
-    }
-    .section h2{
-      margin:0;
-      font-size:18px;
-    }
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      padding:5px 10px;
-      border-radius:999px;
-      background:#08111f;
-      border:1px solid var(--line);
-      font-size:12px;
-      color:#cbd5e1;
-    }
-    textarea{
-      width:100%;
-      min-height:190px;
-      resize:vertical;
-      background:#08111f;
-      color:var(--text);
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:14px;
-      font:inherit;
-      outline:none;
-    }
-    .row{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:12px;
-    }
-    button{
-      border:0;
-      border-radius:12px;
-      padding:12px 16px;
-      font-weight:700;
-      cursor:pointer;
-      font:inherit;
-    }
-    .primary{
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      color:#fff;
-    }
-    .secondary{
-      background:#1f2937;
-      color:#fff;
-      border:1px solid var(--line);
-    }
-    .danger{
-      background:var(--danger);
-      color:#fff;
-    }
-    .cards{
-      display:grid;
-      grid-template-columns:repeat(4,minmax(0,1fr));
-      gap:12px;
-    }
-    .card{
-      background:var(--panel2);
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:14px;
-    }
-    .card h3{
-      margin:0 0 8px;
-      font-size:14px;
-      color:#cbd5e1;
-    }
-    .card .val{
-      font-size:20px;
-      font-weight:800;
-    }
-    .split{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:16px;
-    }
-    table{
-      width:100%;
-      border-collapse:collapse;
-      border-radius:14px;
-      overflow:hidden;
-    }
-    th,td{
-      border-bottom:1px solid var(--line);
-      padding:10px;
-      text-align:left;
-      vertical-align:top;
-    }
-    th{
-      background:#08111f;
-      color:#cbd5e1;
-    }
-    .journal{
-      display:grid;
-      gap:10px;
-    }
-    .item{
-      background:#08111f;
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:12px;
-    }
-    .item h4{
-      margin:0 0 8px;
-    }
-    .two{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:10px;
-    }
-    .small{
-      color:var(--muted);
-      font-size:13px;
-      line-height:1.6;
-    }
-    .credit{color:#fca5a5}
-    .debit{color:#86efac}
-    .sticky{
-      position:sticky;
-      top:12px;
-    }
-    .footer{
-      height:18px;
-    }
-    .money{
-      font-variant-numeric:tabular-nums;
-    }
-    @media (max-width: 1100px){
-      .grid,.split,.cards{
-        grid-template-columns:1fr;
-      }
-      .sticky{
-        position:static;
-      }
-    }
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:radial-gradient(circle at top,rgba(56,189,248,.14),transparent 32%),linear-gradient(180deg,#020617 0%,var(--bg) 100%);color:var(--text)}
+    .wrap{max-width:1400px;margin:0 auto;padding:20px;display:grid;gap:16px}
+    .hero,.panel{background:rgba(15,23,42,.88);border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 50px rgba(0,0,0,.28)}
+    .hero{padding:24px}.hero h1{margin:0 0 10px;font-size:clamp(30px,5vw,54px);line-height:1}.hero p{margin:0;color:var(--muted);line-height:1.7;max-width:84ch}
+    .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}.panel{padding:16px}
+    .section{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.section h2{margin:0;font-size:18px}
+    .badge{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;background:#08111f;border:1px solid var(--line);font-size:12px;color:#cbd5e1}
+    textarea{width:100%;min-height:190px;resize:vertical;background:#08111f;color:var(--text);border:1px solid var(--line);border-radius:14px;padding:14px;font:inherit;outline:none}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    button{border:0;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;font:inherit}
+    .primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}.secondary{background:#1f2937;color:#fff;border:1px solid var(--line)}.danger{background:var(--danger);color:#fff}
+    .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.card{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:14px}.card h3{margin:0 0 8px;font-size:14px;color:#cbd5e1}.card .val{font-size:20px;font-weight:800}
+    .split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    table{width:100%;border-collapse:collapse;border-radius:14px;overflow:hidden} th,td{border-bottom:1px solid var(--line);padding:10px;text-align:left;vertical-align:top} th{background:#08111f;color:#cbd5e1}
+    .journal{display:grid;gap:10px}.item{background:#08111f;border:1px solid var(--line);border-radius:16px;padding:12px}.item h4{margin:0 0 8px}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .small{color:var(--muted);font-size:13px;line-height:1.6}.credit{color:#fca5a5}.debit{color:#86efac}.sticky{position:sticky;top:12px}.footer{height:18px}.money{font-variant-numeric:tabular-nums}
+    @media (max-width: 1100px){.grid,.split,.cards{grid-template-columns:1fr}.sticky{position:static}}
   </style>
 </head>
 <body>
@@ -221,10 +40,7 @@
 
     <div class="grid">
       <div class="panel">
-        <div class="section">
-          <h2>Consegna della giornata</h2>
-          <span class="badge">Salvataggio automatico</span>
-        </div>
+        <div class="section"><h2>Consegna della giornata</h2><span class="badge">Salvataggio automatico</span></div>
         <textarea id="consegna" placeholder="Incolla qui la consegna della giornata..."></textarea>
         <div class="row">
           <button class="primary" id="analizzaBtn">Analizza consegna</button>
@@ -234,72 +50,39 @@
       </div>
 
       <div class="panel sticky">
-        <div class="section">
-          <h2>Stato esercizio</h2>
-          <span class="badge" id="giornateCount">0 giornate</span>
-        </div>
+        <div class="section"><h2>Stato esercizio</h2><span class="badge" id="giornateCount">0 giornate</span></div>
         <div class="cards">
-          <div class="card">
-            <h3>Giornata attiva</h3>
-            <div class="val" id="giornataAttiva">1</div>
-          </div>
-          <div class="card">
-            <h3>Movimenti</h3>
-            <div class="val" id="movimentiTot">0</div>
-          </div>
-          <div class="card">
-            <h3>Conti</h3>
-            <div class="val" id="contiTot">0</div>
-          </div>
-          <div class="card">
-            <h3>IVA netta</h3>
-            <div class="val money" id="ivaNetta">0,00</div>
-          </div>
+          <div class="card"><h3>Giornata attiva</h3><div class="val" id="giornataAttiva">1</div></div>
+          <div class="card"><h3>Movimenti</h3><div class="val" id="movimentiTot">0</div></div>
+          <div class="card"><h3>Conti</h3><div class="val" id="contiTot">0</div></div>
+          <div class="card"><h3>IVA netta</h3><div class="val money" id="ivaNetta">0,00</div></div>
         </div>
       </div>
     </div>
 
     <div class="split">
       <div class="panel">
-        <div class="section">
-          <h2>Scrittura della giornata</h2>
-          <span class="badge">Dare / Avere</span>
-        </div>
+        <div class="section"><h2>Scrittura della giornata</h2><span class="badge">Dare / Avere</span></div>
         <table>
-          <thead>
-            <tr>
-              <th>Conto</th>
-              <th>Dare</th>
-              <th>Avere</th>
-            </tr>
-          </thead>
+          <thead><tr><th>Conto</th><th>Dare</th><th>Avere</th></tr></thead>
           <tbody id="tabellaGiornata"></tbody>
         </table>
       </div>
 
       <div class="panel">
-        <div class="section">
-          <h2>Spiegazione operazione</h2>
-          <span class="badge">Sintesi IA</span>
-        </div>
+        <div class="section"><h2>Spiegazione operazione</h2><span class="badge">Sintesi IA</span></div>
         <div id="spiegazione" class="small">Qui comparirà il testo che spiega in modo semplice cosa succede nella giornata.</div>
       </div>
     </div>
 
     <div class="split">
       <div class="panel">
-        <div class="section">
-          <h2>Mastrini generali</h2>
-          <span class="badge">Riassunto esercizio</span>
-        </div>
+        <div class="section"><h2>Mastrini generali</h2><span class="badge">Riassunto esercizio</span></div>
         <div id="mastriniGenerali" class="journal"></div>
       </div>
 
       <div class="panel">
-        <div class="section">
-          <h2>Giornate salvate</h2>
-          <span class="badge" id="lastSave">Nessun salvataggio</span>
-        </div>
+        <div class="section"><h2>Giornate salvate</h2><span class="badge" id="lastSave">Nessun salvataggio</span></div>
         <div id="elencoGiornate" class="journal"></div>
       </div>
     </div>
@@ -308,173 +91,28 @@
   </div>
 
 <script>
-const LS_KEY='ai_partita_doppia_esercizio_v2';
+const LS_KEY='ai_partita_doppia_esercizio_v3';
 const defaultState={giornate:[], mastrini:{}, consegna:''};
 const state=JSON.parse(localStorage.getItem(LS_KEY)||JSON.stringify(defaultState));
 const el=id=>document.getElementById(id);
 const money=n=>(Math.round((n||0)*100)/100).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
 const add=(obj,k,d=0,a=0)=>{if(!obj[k])obj[k]={dare:0,avere:0};obj[k].dare+=d;obj[k].avere+=a};
-
-function save(){
-  localStorage.setItem(LS_KEY,JSON.stringify(state));
-  render();
-}
-
-function inferAmounts(text){
-  const nums=[...text.matchAll(/\b\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?\b/g)]
-    .map(m=>Number(m[0].replace(/\./g,'').replace(',','.')))
-    .filter(n=>Number.isFinite(n));
-  const base=nums[0]||1000;
-  const vatRate=/22\s*%|22%/.test(text)?0.22:/10\s*%|10%/.test(text)?0.10:/4\s*%|4%/.test(text)?0.04:0.22;
-  return {base,vat:Math.round(base*vatRate*100)/100};
-}
-
-function parse(text){
-  const t=(text||'').toLowerCase();
-  const {base,vat}=inferAmounts(text);
-  const e=[];
-  const notes=[];
-  const push=(conto,d=0,a=0)=>e.push({conto,dare:d,avere:a});
-
-  if(t.includes('ammort')){
-    const quota=vat>0?Math.max(50,Math.round(base*0.05*100)/100):Math.max(100,Math.round(base*0.1*100)/100);
-    push('Ammortamento',quota,0);
-    push('Fondo ammortamento',0,quota);
-    notes.push(`Si rileva la quota di ammortamento del bene per ${money(quota)} e si aggiorna il fondo ammortamento come conto rettificativo dell’attivo.`);
-  }
-
-  if(t.includes('iva')){
-    if(t.includes('acqu')){
-      push('IVA a credito',vat,0);
-      notes.push(`L’IVA a credito viene registrata per ${money(vat)} perché l’operazione è di acquisto.`);
-    } else if(t.includes('vend')||t.includes('serviz')||t.includes('prestaz')){
-      push('IVA a debito',0,vat);
-      notes.push(`L’IVA a debito viene registrata per ${money(vat)} perché l’operazione è di vendita.`);
-    } else {
-      push('IVA a credito',vat/2,0);
-      push('IVA a debito',0,vat/2);
-      notes.push(`L’operazione coinvolge l’IVA e l’app la separa in credito e debito in modo prudente.`);
-    }
-  }
-
-  if(t.includes('banca')||t.includes('bonifico')||t.includes('c/c')||t.includes('conto corrente')){
-    push('Banca c/c',base,0);
-    notes.push(`Il movimento passa dalla banca per ${money(base)} e viene registrato nel conto corrente.`);
-  }
-
-  if(t.includes('incass')||t.includes('ricev')){
-    push('Banca c/c',base,0);
-    notes.push(`L’azienda incassa ${money(base)} e il movimento entra in banca c/c.`);
-  }
-
-  if(t.includes('pag')){
-    push('Banca c/c',0,base);
-    notes.push(`L’azienda paga ${money(base)} tramite banca c/c.`);
-  }
-
-  if(t.includes('vend')){
-    push('Ricavi di vendita',0,base);
-    notes.push(`Si rileva un ricavo di vendita per ${money(base)} nel conto economico.`);
-  }
-
-  if(t.includes('acqu')){
-    push('Acquisti',base,0);
-    notes.push(`Si rileva un acquisto per ${money(base)} e il costo viene portato nel conto corretto.`);
-  }
-
-  if(t.includes('erario')){
-    const saldo=Math.round(vat*0.2*100)/100;
-    push('Erario c/IVA',0,saldo);
-    notes.push(`Il conto Erario c/IVA viene aggiornato per ${money(saldo)} in base alla liquidazione IVA.`);
-  }
-
-  if(t.includes('merci')||t.includes('material')){
-    push('Merci c/acquisti',base,0);
-    notes.push(`L’operazione riguarda merci o materiali per ${money(base)}.`);
-  }
-
-  if(t.includes('client')||t.includes('credito verso clienti')){
-    push('Clienti c/fatture da emettere',base,0);
-    notes.push(`Si rileva un credito verso clienti per ${money(base)}.`);
-  }
-
-  if(t.includes('fornitor')||t.includes('debiti v/fornitori')){
-    push('Debiti v/fornitori',0,base);
-    notes.push(`Si rileva un debito verso fornitori per ${money(base)}.`);
-  }
-
-  if(t.includes('capitale')||t.includes('apporto')){
-    push('Capitale sociale',0,base);
-    notes.push(`Si registra un apporto di capitale per ${money(base)}.`);
-  }
-
-  if(!e.length){
-    push('Conto generico',base,base);
-    notes.push(`Bozza di scrittura contabile in attesa di regole più precise. L’app ha usato il valore ${money(base)} come riferimento.`);
-  }
-
-  const balance=e.reduce((s,r)=>s+r.dare-r.avere,0);
-  if(Math.abs(balance)>0.01){
-    if(balance>0) push('Rettifica contabile',0,balance);
-    else push('Rettifica contabile',-balance,0);
-    notes.push(`La scrittura è stata bilanciata automaticamente con una rettifica di ${money(Math.abs(balance))}.`);
-  }
-
-  return {entries:e, explain:notes.join(' ')};
-}
-
-function processDay(){
-  const text=el('consegna').value.trim();
-  if(!text) return;
-  const day={id:Date.now(),text,...parse(text)};
-  state.giornate.push(day);
-  day.entries.forEach(r=>add(state.mastrini,r.conto,r.dare,r.avere));
-  state.consegna='';
-  el('consegna').value='';
-  save();
-}
-
-function render(){
-  el('giornateCount').textContent=`${state.giornate.length} giornate`;
-  el('giornataAttiva').textContent=state.giornate.length+1;
-  el('movimentiTot').textContent=state.giornate.reduce((s,g)=>s+g.entries.length,0);
-  el('contiTot').textContent=Object.keys(state.mastrini).length;
-
-  const ivaCred=state.mastrini['IVA a credito']?.dare||0;
-  const ivaDeb=state.mastrini['IVA a debito']?.avere||0;
-  el('ivaNetta').textContent=money(ivaDeb-ivaCred);
-
-  el('spiegazione').textContent=state.giornate.length
-    ? state.giornate[state.giornate.length-1].explain
-    : 'Qui comparirà il testo che spiega in modo semplice cosa succede nella giornata.';
-
-  el('tabellaGiornata').innerHTML=state.giornate.length
-    ? state.giornate[state.giornate.length-1].entries.map(r=>`<tr><td>${r.conto}</td><td class="debit">${r.dare?money(r.dare):''}</td><td class="credit">${r.avere?money(r.avere):''}</td></tr>`).join('')
-    : '<tr><td colspan="3" class="small">Nessuna scrittura ancora presente.</td></tr>';
-
-  el('mastriniGenerali').innerHTML=Object.keys(state.mastrini).length
-    ? Object.entries(state.mastrini).map(([conto,v])=>`<div class="item"><h4>${conto}</h4><div class="two"><div><div class="small">Dare</div><div class="debit money">${money(v.dare)}</div></div><div><div class="small">Avere</div><div class="credit money">${money(v.avere)}</div></div></div></div>`).join('')
-    : '<div class="item"><h4>Nessun mastrino</h4><div class="small">Inserisci la prima consegna per creare i mastrini generali.</div></div>';
-
-  el('elencoGiornate').innerHTML=state.giornate.length
-    ? state.giornate.slice().reverse().map(g=>`<div class="item"><h4>Giornata ${state.giornate.indexOf(g)+1}</h4><div class="small">${g.text}</div><div class="small" style="margin-top:8px">${g.explain}</div></div>`).join('')
-    : '<div class="item"><h4>Nessuna giornata salvata</h4><div class="small">Le giornate future verranno conservate qui senza cancellare quelle precedenti.</div></div>';
-
-  el('lastSave').textContent=state.giornate.length?'Salvato':'Nessun salvataggio';
-}
-
-function clearEx(){
-  if(confirm('Vuoi cancellare tutto l’esercizio?')){
-    localStorage.removeItem(LS_KEY);
-    location.reload();
-  }
-}
-
-el('analizzaBtn').onclick=processDay;
-el('nuovaGiornataBtn').onclick=()=>{el('consegna').value='';state.consegna='';save()};
-el('cancellaBtn').onclick=clearEx;
-el('consegna').value=state.consegna||'';
-render();
-</script>
-</body>
-</html>
+function save(){localStorage.setItem(LS_KEY,JSON.stringify(state));render();}
+function inferAmounts(text){const nums=[...text.matchAll(/\b\d{1,3}(?:[\.,]\d{3})*(?:[\.,]\d+)?\b/g)].map(m=>Number(m[0].replace(/\./g,'').replace(',','.'))).filter(n=>Number.isFinite(n));const base=nums[0]||1000;const vatRate=/22\s*%|22%/.test(text)?0.22:/10\s*%|10%/.test(text)?0.10:/4\s*%|4%/.test(text)?0.04:0.22;return {base,vat:Math.round(base*vatRate*100)/100};}
+function parse(text){const t=(text||'').toLowerCase();const {base,vat}=inferAmounts(text);const e=[];const notes=[];const push=(conto,d=0,a=0)=>e.push({conto,dare:d,avere:a});
+  if(t.includes('ammort')){const quota=vat>0?Math.max(50,Math.round(base*0.05*100)/100):Math.max(100,Math.round(base*0.1*100)/100);push('Ammortamento',quota,0);push('Fondo ammortamento',0,quota);notes.push(`Si rileva la quota di ammortamento del bene per ${money(quota)} e si aggiorna il fondo ammortamento come conto rettificativo dell’attivo.`)}
+  if(t.includes('iva')){if(t.includes('acqu')){push('IVA a credito',vat,0);notes.push(`L’IVA a credito viene registrata per ${money(vat)} perché l’operazione è di acquisto.`)}else if(t.includes('vend')||t.includes('serviz')||t.includes('prestaz')){push('IVA a debito',0,vat);notes.push(`L’IVA a debito viene registrata per ${money(vat)} perché l’operazione è di vendita.`)}else{push('IVA a credito',vat/2,0);push('IVA a debito',0,vat/2);notes.push(`L’operazione coinvolge l’IVA e l’app la separa in credito e debito in modo prudente.`)}}
+  if(t.includes('banca')||t.includes('bonifico')||t.includes('c/c')||t.includes('conto corrente')){push('Banca c/c',base,0);notes.push(`Il movimento passa dalla banca per ${money(base)} e viene registrato nel conto corrente.`)}
+  if(t.includes('incass')||t.includes('ricev')){push('Banca c/c',base,0);notes.push(`L’azienda incassa ${money(base)} e il movimento entra in banca c/c.`)}
+  if(t.includes('pag')){push('Banca c/c',0,base);notes.push(`L’azienda paga ${money(base)} tramite banca c/c.`)}
+  if(t.includes('vend')){push('Ricavi di vendita',0,base);notes.push(`Si rileva un ricavo di vendita per ${money(base)} nel conto economico.`)}
+  if(t.includes('acqu')){push('Acquisti',base,0);notes.push(`Si rileva un acquisto per ${money(base)} e il costo viene portato nel conto corretto.`)}
+  if(t.includes('erario')){const saldo=Math.round(vat*0.2*100)/100;push('Erario c/IVA',0,saldo);notes.push(`Il conto Erario c/IVA viene aggiornato per ${money(saldo)} in base alla liquidazione IVA.`)}
+  if(t.includes('merci')||t.includes('material')){push('Merci c/acquisti',base,0);notes.push(`L’operazione riguarda merci o materiali per ${money(base)}.`)}
+  if(t.includes('client')||t.includes('credito verso clienti')){push('Clienti c/fatture da emettere',base,0);notes.push(`Si rileva un credito verso clienti per ${money(base)}.`)}
+  if(t.includes('fornitor')||t.includes('debiti v/fornitori')){push('Debiti v/fornitori',0,base);notes.push(`Si rileva un debito verso fornitori per ${money(base)}.`)}
+  if(t.includes('capitale')||t.includes('apporto')){push('Capitale sociale',0,base);notes.push(`Si registra un apporto di capitale per ${money(base)}.`)}
+  if(!e.length){push('Conto generico',base,base);notes.push(`Bozza di scrittura contabile in attesa di regole più precise. L’app ha usato il valore ${money(base)} come riferimento.`)}
+  const balance=e.reduce((s,r)=>s+r.dare-r.avere,0);if(Math.abs(balance)>0.01){if(balance>0)push('Rettifica contabile',0,balance);else push('Rettifica contabile',-balance,0);notes.push(`La scrittura è stata bilanciata automaticamente con una rettifica di ${money(Math.abs(balance))}.`)}
+  return {entries:e, explain:notes.join(' ')};}
+function processDay(){const text=el('consegna').value.trim();if(!text)return;const day={id:Date.now(),text,...parse(text)};state.giornate.push(day);day.entries.forEach(r=>add(state.mastrini,r.conto,r.dare,r.avere));state.consegna='';el('cons
