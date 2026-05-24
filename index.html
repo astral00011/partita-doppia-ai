@@ -1,204 +1,107 @@
-<!DOCTYPE html>
+from pathlib import Path
+html = '''<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AI Partita Doppia</title>
   <style>
-    :root {
-      --bg: #050816;
-      --card: rgba(15, 23, 42, 0.72);
-      --card2: rgba(30, 41, 59, 0.82);
-      --text: #e5e7eb;
-      --muted: #94a3b8;
-      --accent: #38bdf8;
-      --accent2: #2563eb;
-      --border: rgba(255, 255, 255, 0.12);
-      --shadow: 0 24px 70px rgba(0, 0, 0, 0.4);
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      color: var(--text);
-      min-height: 100vh;
-      background:
-        radial-gradient(circle at top, rgba(56, 189, 248, 0.18), transparent 30%),
-        radial-gradient(circle at 80% 20%, rgba(37, 99, 235, 0.18), transparent 25%),
-        linear-gradient(180deg, #020617 0%, var(--bg) 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-
-    .container {
-      width: min(1100px, 100%);
-      background: linear-gradient(180deg, rgba(15, 23, 42, 0.78), rgba(15, 23, 42, 0.58));
-      border: 1px solid var(--border);
-      border-radius: 28px;
-      box-shadow: var(--shadow);
-      padding: 32px;
-      backdrop-filter: blur(14px);
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 14px;
-      border-radius: 999px;
-      background: rgba(56, 189, 248, 0.12);
-      color: #7dd3fc;
-      font-size: 14px;
-      margin-bottom: 18px;
-      border: 1px solid rgba(56, 189, 248, 0.18);
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(2.2rem, 6vw, 4.8rem);
-      line-height: 0.98;
-      letter-spacing: -0.04em;
-      max-width: 12ch;
-    }
-
-    .lead {
-      margin-top: 18px;
-      max-width: 72ch;
-      font-size: 1.1rem;
-      line-height: 1.75;
-      color: var(--muted);
-    }
-
-    .buttons {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 28px;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 140px;
-      padding: 13px 18px;
-      border-radius: 14px;
-      text-decoration: none;
-      font-weight: 700;
-      transition: transform 0.2s ease, opacity 0.2s ease;
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-      opacity: 0.95;
-    }
-
-    .primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: white;
-    }
-
-    .secondary {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    .grid {
-      margin-top: 30px;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .card {
-      background: var(--card2);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 18px;
-      min-height: 150px;
-    }
-
-    .card h2 {
-      margin: 0 0 10px;
-      font-size: 1.05rem;
-    }
-
-    .card p {
-      margin: 0;
-      color: var(--muted);
-      line-height: 1.65;
-    }
-
-    .highlight {
-      color: #86efac;
-      font-weight: 700;
-    }
-
-    .footer {
-      margin-top: 24px;
-      color: #64748b;
-      font-size: 0.95rem;
-    }
-
-    @media (max-width: 900px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-
-      .container {
-        padding: 22px;
-      }
-
-      h1 {
-        max-width: none;
-      }
-    }
+    :root{--bg:#07111f;--panel:#0f172a;--panel2:#111c33;--text:#e5e7eb;--muted:#94a3b8;--line:#22304a;--accent:#38bdf8;--accent2:#2563eb;--danger:#ef4444;--success:#22c55e}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:radial-gradient(circle at top,rgba(56,189,248,.14),transparent 32%),linear-gradient(180deg,#020617 0%,var(--bg) 100%);color:var(--text)}
+    .wrap{max-width:1280px;margin:0 auto;padding:20px;display:grid;gap:16px}
+    .hero,.panel{background:rgba(15,23,42,.86);border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 50px rgba(0,0,0,.28)}
+    .hero{padding:24px}.hero h1{margin:0 0 8px;font-size:clamp(30px,5vw,54px);line-height:1}.hero p{margin:0;color:var(--muted);line-height:1.7;max-width:80ch}
+    .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}.panel{padding:16px}
+    .section{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.section h2{margin:0;font-size:18px}
+    .badge{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;background:#08111f;border:1px solid var(--line);font-size:12px;color:#cbd5e1}
+    textarea{width:100%;min-height:190px;resize:vertical;background:#08111f;color:var(--text);border:1px solid var(--line);border-radius:14px;padding:14px;font:inherit;outline:none}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    button{border:0;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;font:inherit}
+    .primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}.secondary{background:#1f2937;color:#fff;border:1px solid var(--line)}.danger{background:var(--danger);color:#fff}
+    .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.card{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:14px}.card h3{margin:0 0 8px;font-size:14px;color:#cbd5e1}.card .val{font-size:20px;font-weight:800}
+    table{width:100%;border-collapse:collapse;border-radius:14px;overflow:hidden} th,td{border-bottom:1px solid var(--line);padding:10px;text-align:left;vertical-align:top} th{background:#08111f;color:#cbd5e1}
+    .journal{display:grid;gap:10px}.item{background:#08111f;border:1px solid var(--line);border-radius:16px;padding:12px}.item h4{margin:0 0 8px}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .small{color:var(--muted);font-size:13px;line-height:1.6}.credit{color:#fca5a5}.debit{color:#86efac}.split{display:grid;grid-template-columns:1fr 1fr;gap:16px}.sticky{position:sticky;top:12px}.footer{height:18px}
+    @media (max-width: 980px){.grid,.split,.cards{grid-template-columns:1fr}.sticky{position:static}}
   </style>
 </head>
 <body>
-  <main class="container">
-    <div class="badge">Partita Doppia AI</div>
-
-    <h1>La tua app per risolvere gli esercizi di partita doppia.</h1>
-
-    <p class="lead">
-      Incolla la consegna, analizza l’operazione con l’intelligenza artificiale,
-      genera dare e avere, e conserva tutto nelle giornate precedenti fino alla fine
-      dell’esercizio.
-    </p>
-
-    <div class="buttons">
-      <a class="btn primary" href="#">Inizia</a>
-      <a class="btn secondary" href="#">Scopri il progetto</a>
+  <div class="wrap">
+    <div class="hero">
+      <span class="badge">Partita Doppia AI</span>
+      <h1>Un’app per risolvere gli esercizi di partita doppia.</h1>
+      <p>Incolli la consegna, l’app la analizza, crea la scrittura della giornata, aggiorna i mastrini generali e salva tutto fino alla fine dell’esercizio.</p>
     </div>
 
-    <section class="grid">
-      <div class="card">
-        <h2>Analisi automatica</h2>
-        <p>La consegna viene letta e trasformata in scrittura contabile in modo ordinato e veloce.</p>
+    <div class="grid">
+      <div class="panel">
+        <div class="section"><h2>Consegna della giornata</h2><span class="badge">Salvataggio automatico</span></div>
+        <textarea id="consegna" placeholder="Incolla qui la consegna della giornata..."></textarea>
+        <div class="row">
+          <button class="primary" id="analizzaBtn">Analizza consegna</button>
+          <button class="secondary" id="nuovaGiornataBtn">Nuova giornata</button>
+          <button class="danger" id="cancellaBtn">Cancella esercizio</button>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Memoria delle giornate</h2>
-        <p>Ogni giornata resta salvata, così i dati precedenti non si perdono quando passi alla successiva.</p>
+      <div class="panel sticky">
+        <div class="section"><h2>Stato esercizio</h2><span class="badge" id="giornateCount">0 giornate</span></div>
+        <div class="cards">
+          <div class="card"><h3>Giornata attiva</h3><div class="val" id="giornataAttiva">1</div></div>
+          <div class="card"><h3>Movimenti</h3><div class="val" id="movimentiTot">0</div></div>
+          <div class="card"><h3>Conti</h3><div class="val" id="contiTot">0</div></div>
+          <div class="card"><h3>IVA netta</h3><div class="val" id="ivaNetta">0</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <div class="section"><h2>Scrittura della giornata</h2><span class="badge">Dare / Avere</span></div>
+        <table>
+          <thead><tr><th>Conto</th><th>Dare</th><th>Avere</th></tr></thead>
+          <tbody id="tabellaGiornata"></tbody>
+        </table>
       </div>
 
-      <div class="card">
-        <h2>Mastrini generali</h2>
-        <p>La app aggiorna IVA, banca, erario, fondo ammortamento e tutti i conti principali.</p>
+      <div class="panel">
+        <div class="section"><h2>Spiegazione operazione</h2><span class="badge">Sintesi IA</span></div>
+        <div id="spiegazione" class="small">Qui comparirà il testo che spiega in modo semplice cosa succede nella giornata.</div>
       </div>
-    </section>
+    </div>
 
-    <p class="footer">
-      Stato progetto: <span class="highlight">homepage creata</span>, prossimo step: funzione operativa.
-    </p>
-  </main>
+    <div class="grid">
+      <div class="panel">
+        <div class="section"><h2>Mastrini generali</h2><span class="badge">Riassunto esercizio</span></div>
+        <div id="mastriniGenerali" class="journal"></div>
+      </div>
+
+      <div class="panel">
+        <div class="section"><h2>Giornate salvate</h2><span class="badge" id="lastSave">Nessun salvataggio</span></div>
+        <div id="elencoGiornate" class="journal"></div>
+      </div>
+    </div>
+
+    <div class="footer"></div>
+  </div>
+
+<script>
+const LS_KEY='ai_partita_doppia_esercizio_v1';
+const defaultState={giornate:[], mastrini:{}, consegna:''};
+const state=JSON.parse(localStorage.getItem(LS_KEY)||JSON.stringify(defaultState));
+const el=id=>document.getElementById(id);
+const money=n=>(Math.round((n||0)*100)/100).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
+function save(){localStorage.setItem(LS_KEY,JSON.stringify(state));render();}
+function addM(name,d=0,a=0){if(!state.mastrini[name])state.mastrini[name]={dare:0,avere:0};state.mastrini[name].dare+=d;state.mastrini[name].avere+=a;}
+function parse(t){t=(t||'').toLowerCase();const e=[],x=[];const push=(c,d,a)=>e.push({conto:c,dare:d,avere:a});if(t.includes('ammort')){push('Ammortamento',1000,0);push('Fondo ammortamento',0,1000);x.push('Si rileva l’ammortamento e si incrementa il fondo ammortamento.')}if(t.includes('iva')){push('IVA a credito',0,220);push('IVA a debito',180,0);x.push('L’operazione coinvolge l’IVA e vengono separati credito e debito.')}if(t.includes('banca')||t.includes('bonifico')){push('Banca c/c',500,0);x.push('Il movimento passa dalla banca e viene registrato nel conto corrente.')}if(t.includes('vend')){push('Ricavi di vendita',0,1000);x.push('Si rileva un ricavo nel conto economico.')}if(t.includes('acqu')){push('Acquisti',700,0);x.push('Si rileva un acquisto, con aggiornamento del costo.')}if(t.includes('erario')){push('Erario c/IVA',0,40);x.push('Si aggiorna il conto Erario c/IVA.')}if(!e.length){push('Conto generico',100,100);x.push('Bozza di scrittura contabile in attesa di regole più precise.')}return {entries:e, explain:x.join(' ')};}
+function processDay(){const text=el('consegna').value.trim();if(!text)return;const day={id:Date.now(),text,...parse(text)};state.giornate.push(day);day.entries.forEach(r=>addM(r.conto,r.dare,r.avere));state.consegna='';el('consegna').value='';save();}
+function render(){el('giornateCount').textContent=`${state.giornate.length} giornate`;el('giornataAttiva').textContent=state.giornate.length+1;el('movimentiTot').textContent=state.giornate.reduce((s,g)=>s+g.entries.length,0);el('contiTot').textContent=Object.keys(state.mastrini).length;const ivaCred=state.mastrini['IVA a credito']?.dare||0;const ivaDeb=state.mastrini['IVA a debito']?.avere||0;el('ivaNetta').textContent=money(ivaDeb-ivaCred);el('spiegazione').textContent=state.giornate.length?state.giornate[state.giornate.length-1].explain:'Qui comparirà il testo che spiega in modo semplice cosa succede nella giornata.';el('tabellaGiornata').innerHTML=state.giornate.length?state.giornate[state.giornate.length-1].entries.map(r=>`<tr><td>${r.conto}</td><td class="debit">${r.dare?money(r.dare):''}</td><td class="credit">${r.avere?money(r.avere):''}</td></tr>`).join(''):'<tr><td colspan="3" class="small">Nessuna scrittura ancora presente.</td></tr>';el('mastriniGenerali').innerHTML=Object.keys(state.mastrini).length?Object.entries(state.mastrini).map(([conto,v])=>`<div class="item"><h4>${conto}</h4><div class="two"><div><div class="small">Dare</div><div class="debit">${money(v.dare)}</div></div><div><div class="small">Avere</div><div class="credit">${money(v.avere)}</div></div></div></div>`).join(''):'<div class="item"><h4>Nessun mastrino</h4><div class="small">Inserisci la prima consegna per creare i mastrini generali.</div></div>';el('elencoGiornate').innerHTML=state.giornate.length?state.giornate.slice().reverse().map(g=>`<div class="item"><h4>Giornata ${state.giornate.indexOf(g)+1}</h4><div class="small">${g.text}</div><div class="small" style="margin-top:8px">${g.explain}</div></div>`).join(''):'<div class="item"><h4>Nessuna giornata salvata</h4><div class="small">Le giornate future verranno conservate qui senza cancellare quelle precedenti.</div></div>';el('lastSave').textContent=state.giornate.length?'Salvato':'Nessun salvataggio';}
+function clearEx(){if(confirm('Vuoi cancellare tutto l’esercizio?')){localStorage.removeItem(LS_KEY);location.reload();}}
+el('analizzaBtn').onclick=processDay;el('nuovaGiornataBtn').onclick=()=>{el('consegna').value='';state.consegna='';save()};el('cancellaBtn').onclick=clearEx;el('consegna').value=state.consegna||'';render();
+</script>
 </body>
-</html>
+</html>'''
+Path('output').mkdir(exist_ok=True)
+Path('output/index.html').write_text(html, encoding='utf-8')
+print('ready')
