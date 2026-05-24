@@ -1,78 +1,142 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>AI Partita Doppia</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Partita Doppia AI</title>
   <style>
-    body{font-family:system-ui,sans-serif;margin:0;background:#f6f5f1;color:#222}
-    .wrap{max-width:1200px;margin:auto;padding:20px;display:grid;gap:16px}
-    .card{background:#fff;border:1px solid #ddd;border-radius:16px;padding:16px;box-shadow:0 10px 24px rgba(0,0,0,.06)}
-    textarea,input{width:100%;font:inherit;padding:12px;border:1px solid #ccc;border-radius:12px;box-sizing:border-box}
-    textarea{min-height:180px}
-    button{padding:12px 16px;border:0;border-radius:999px;background:#006b73;color:#fff;font-weight:700;cursor:pointer}
-    button.secondary{background:#e9e7e2;color:#222}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    pre{white-space:pre-wrap;word-break:break-word;background:#fbfaf7;padding:12px;border-radius:12px;border:1px solid #e1ded7}
-    small{color:#666}
-    .row{display:flex;gap:10px;flex-wrap:wrap}
-    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+    :root {
+      --bg: #0f172a;
+      --card: rgba(255,255,255,0.08);
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent2: #22c55e;
+      --border: rgba(255,255,255,0.14);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top, rgba(56,189,248,0.18), transparent 35%),
+        linear-gradient(180deg, #020617 0%, var(--bg) 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .card {
+      width: min(900px, 100%);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(56,189,248,0.15);
+      color: #7dd3fc;
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: 1.05;
+    }
+
+    p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.7;
+      max-width: 65ch;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+
+    a.btn {
+      text-decoration: none;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 14px;
+      font-weight: 600;
+      border: 1px solid transparent;
+    }
+
+    .primary { background: linear-gradient(135deg, var(--accent), #2563eb); }
+    .secondary { background: rgba(255,255,255,0.08); border-color: var(--border); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 28px;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.05);
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    .panel h2 {
+      margin: 0 0 8px;
+      font-size: 1.1rem;
+    }
+
+    .panel p { margin: 0; font-size: 0.98rem; }
+
+    .accent {
+      color: #86efac;
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="card">
-    <h1>AI per partita doppia</h1>
-    <p>Incolla la consegna e premi analizza. L’AI vera verrà collegata nel passo successivo.</p>
-    <textarea id="prompt" placeholder="Incolla qui la consegna..."></textarea>
-    <div class="row" style="margin-top:12px">
-      <button id="analyze">Analizza</button>
-      <button class="secondary" id="clear">Pulisci</button>
-    </div>
-  </div>
+  <main class="card">
+    <span class="badge">Partita Doppia AI</span>
+    <h1>Il tuo progetto sta prendendo forma.</h1>
+    <p>
+      Qui possiamo costruire la versione bella del sito: descrizione, funzionalità,
+      pulsanti, sezioni e il resto del nostro progetto.
+    </p>
 
-  <div class="grid">
-    <div class="card">
-      <h2>Risultato AI</h2>
-      <pre id="aiout">Nessuna analisi.</pre>
+    <div class="buttons">
+      <a class="btn primary" href="#">Inizia</a>
+      <a class="btn secondary" href="#">Scopri di più</a>
     </div>
 
-    <div class="card">
-      <h2>Mastrini generali</h2>
-      <pre id="ledger">Banca: 0
-Cassa: 0
-IVA a credito: 0
-IVA a debito: 0
-Erario c/IVA: 0
-Fondo ammortamento: 0</pre>
+    <div class="grid">
+      <section class="panel">
+        <h2>Stato progetto</h2>
+        <p><span class="accent">GitHub Pages attivo</span> e pronto per essere personalizzato.</p>
+      </section>
+      <section class="panel">
+        <h2>Prossimo passo</h2>
+        <p>Inserire il contenuto reale e collegare le pagine del progetto.</p>
+      </section>
+      <section class="panel">
+        <h2>Obiettivo</h2>
+        <p>Trasformare la homepage base in una landing page pulita e professionale.</p>
+      </section>
     </div>
-  </div>
-
-  <div class="card">
-    <h2>Note</h2>
-    <small>
-      Questa è la base dell’app. Dopo collegheremo il modello AI vero in modo sicuro e aggiungeremo la logica contabile completa.
-    </small>
-  </div>
-</div>
-
-<script>
-const p = document.getElementById('prompt');
-const aiout = document.getElementById('aiout');
-
-document.getElementById('clear').onclick = () => {
-  p.value = '';
-  aiout.textContent = 'Nessuna analisi.';
-};
-
-document.getElementById('analyze').onclick = async () => {
-  const t = p.value.trim();
-  if (!t) {
-    aiout.textContent = 'Inserisci una consegna.';
-    return;
-  }
-  aiout.textContent = 'AI non ancora collegata: nel prossimo passo la collegheremo per analizzare la consegna e proporre la scrittura.';
-};
-</script>
+  </main>
 </body>
 </html>
