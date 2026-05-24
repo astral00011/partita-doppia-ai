@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Partita Doppia</title>
+  <style>
+    body{font-family:system-ui,sans-serif;margin:0;background:#f6f5f1;color:#222}
+    .wrap{max-width:1200px;margin:auto;padding:20px;display:grid;gap:16px}
+    .card{background:#fff;border:1px solid #ddd;border-radius:16px;padding:16px;box-shadow:0 10px 24px rgba(0,0,0,.06)}
+    textarea,input{width:100%;font:inherit;padding:12px;border:1px solid #ccc;border-radius:12px;box-sizing:border-box}
+    textarea{min-height:180px}
+    button{padding:12px 16px;border:0;border-radius:999px;background:#006b73;color:#fff;font-weight:700;cursor:pointer}
+    button.secondary{background:#e9e7e2;color:#222}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    pre{white-space:pre-wrap;word-break:break-word;background:#fbfaf7;padding:12px;border-radius:12px;border:1px solid #e1ded7}
+    small{color:#666}
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>AI per partita doppia</h1>
+    <p>Incolla la consegna e premi analizza. L’AI vera verrà collegata nel passo successivo.</p>
+    <textarea id="prompt" placeholder="Incolla qui la consegna..."></textarea>
+    <div class="row" style="margin-top:12px">
+      <button id="analyze">Analizza</button>
+      <button class="secondary" id="clear">Pulisci</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Risultato AI</h2>
+      <pre id="aiout">Nessuna analisi.</pre>
+    </div>
+
+    <div class="card">
+      <h2>Mastrini generali</h2>
+      <pre id="ledger">Banca: 0
+Cassa: 0
+IVA a credito: 0
+IVA a debito: 0
+Erario c/IVA: 0
+Fondo ammortamento: 0</pre>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Note</h2>
+    <small>
+      Questa è la base dell’app. Dopo collegheremo il modello AI vero in modo sicuro e aggiungeremo la logica contabile completa.
+    </small>
+  </div>
+</div>
+
+<script>
+const p = document.getElementById('prompt');
+const aiout = document.getElementById('aiout');
+
+document.getElementById('clear').onclick = () => {
+  p.value = '';
+  aiout.textContent = 'Nessuna analisi.';
+};
+
+document.getElementById('analyze').onclick = async () => {
+  const t = p.value.trim();
+  if (!t) {
+    aiout.textContent = 'Inserisci una consegna.';
+    return;
+  }
+  aiout.textContent = 'AI non ancora collegata: nel prossimo passo la collegheremo per analizzare la consegna e proporre la scrittura.';
+};
+</script>
+</body>
+</html>
