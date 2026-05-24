@@ -1,142 +1,70 @@
-<!DOCTYPE html>
+from pathlib import Path
+html = '''<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Partita Doppia AI</title>
+  <title>AI Partita Doppia</title>
   <style>
-    :root {
-      --bg: #0f172a;
-      --card: rgba(255,255,255,0.08);
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --accent: #38bdf8;
-      --accent2: #22c55e;
-      --border: rgba(255,255,255,0.14);
-    }
-
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at top, rgba(56,189,248,0.18), transparent 35%),
-        linear-gradient(180deg, #020617 0%, var(--bg) 100%);
-      color: var(--text);
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-    }
-
-    .card {
-      width: min(900px, 100%);
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 32px;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 8px 14px;
-      border-radius: 999px;
-      background: rgba(56,189,248,0.15);
-      color: #7dd3fc;
-      font-size: 14px;
-      margin-bottom: 18px;
-    }
-
-    h1 {
-      margin: 0 0 12px;
-      font-size: clamp(2rem, 5vw, 4rem);
-      line-height: 1.05;
-    }
-
-    p {
-      margin: 0 0 18px;
-      color: var(--muted);
-      font-size: 1.05rem;
-      line-height: 1.7;
-      max-width: 65ch;
-    }
-
-    .buttons {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 24px;
-    }
-
-    a.btn {
-      text-decoration: none;
-      color: white;
-      padding: 12px 18px;
-      border-radius: 14px;
-      font-weight: 600;
-      border: 1px solid transparent;
-    }
-
-    .primary { background: linear-gradient(135deg, var(--accent), #2563eb); }
-    .secondary { background: rgba(255,255,255,0.08); border-color: var(--border); }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-top: 28px;
-    }
-
-    .panel {
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.05);
-      border-radius: 18px;
-      padding: 18px;
-    }
-
-    .panel h2 {
-      margin: 0 0 8px;
-      font-size: 1.1rem;
-    }
-
-    .panel p { margin: 0; font-size: 0.98rem; }
-
-    .accent {
-      color: #86efac;
-      font-weight: 700;
-    }
+    :root{--bg:#0b1220;--card:#111827;--muted:#94a3b8;--text:#e5e7eb;--line:#243046;--accent:#38bdf8;--good:#22c55e;--danger:#ef4444}
+    *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:linear-gradient(180deg,#020617,var(--bg));color:var(--text)}
+    .wrap{max-width:1200px;margin:0 auto;padding:20px;display:grid;gap:16px}
+    .hero,.panel{background:rgba(17,24,39,.92);border:1px solid var(--line);border-radius:18px;box-shadow:0 18px 40px rgba(0,0,0,.25)}
+    .hero{padding:22px}.hero h1{margin:0 0 8px;font-size:clamp(28px,4vw,48px)}.hero p{margin:0;color:var(--muted);line-height:1.6}
+    .grid{display:grid;grid-template-columns:1.3fr .9fr;gap:16px}.panel{padding:16px}
+    textarea,input,select,button{font:inherit} textarea{width:100%;min-height:180px;resize:vertical;background:#0b1020;color:var(--text);border:1px solid var(--line);border-radius:14px;padding:14px;outline:none}
+    button{border:0;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer} .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .btn-primary{background:linear-gradient(135deg,var(--accent),#2563eb);color:#fff}.btn-secondary{background:#1f2937;color:#fff;border:1px solid var(--line)}.btn-danger{background:var(--danger);color:#fff}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.card{background:#0b1020;border:1px solid var(--line);border-radius:14px;padding:14px}
+    .card h3{margin:0 0 8px;font-size:15px;color:#cbd5e1}.card .big{font-size:18px;font-weight:800}.muted{color:var(--muted)}
+    .section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 10px}.section-title h2{margin:0;font-size:18px}
+    table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:14px} th,td{border-bottom:1px solid var(--line);padding:10px;text-align:left;vertical-align:top} th{color:#cbd5e1;background:#0b1020}
+    .badge{display:inline-block;padding:4px 10px;border-radius:999px;background:#0b1020;border:1px solid var(--line);font-size:12px;color:#cbd5e1}
+    .journal{display:grid;gap:10px}.journal-item{background:#0b1020;border:1px solid var(--line);border-radius:14px;padding:12px}.journal-item h4{margin:0 0 8px}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .small{font-size:13px;color:var(--muted);line-height:1.55}.footer-space{height:24px}
+    @media (max-width: 900px){.grid{grid-template-columns:1fr}.two{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <main class="card">
-    <span class="badge">Partita Doppia AI</span>
-    <h1>Il tuo progetto sta prendendo forma.</h1>
-    <p>
-      Qui possiamo costruire la versione bella del sito: descrizione, funzionalità,
-      pulsanti, sezioni e il resto del nostro progetto.
-    </p>
-
-    <div class="buttons">
-      <a class="btn primary" href="#">Inizia</a>
-      <a class="btn secondary" href="#">Scopri di più</a>
+  <div class="wrap">
+    <div class="hero">
+      <h1>AI Partita Doppia</h1>
+      <p>Incolla una consegna, l’app la analizza, crea la scrittura della giornata, aggiorna i mastrini generali e salva tutto per le giornate successive.</p>
     </div>
-
     <div class="grid">
-      <section class="panel">
-        <h2>Stato progetto</h2>
-        <p><span class="accent">GitHub Pages attivo</span> e pronto per essere personalizzato.</p>
-      </section>
-      <section class="panel">
-        <h2>Prossimo passo</h2>
-        <p>Inserire il contenuto reale e collegare le pagine del progetto.</p>
-      </section>
-      <section class="panel">
-        <h2>Obiettivo</h2>
-        <p>Trasformare la homepage base in una landing page pulita e professionale.</p>
-      </section>
+      <div class="panel">
+        <div class="section-title"><h2>Consegna della giornata</h2><span class="badge">Salvataggio automatico</span></div>
+        <textarea id="consegna" placeholder="Incolla qui la consegna della giornata..."></textarea>
+        <div class="row">
+          <button class="btn-primary" id="analizzaBtn">Analizza consegna</button>
+          <button class="btn-secondary" id="nuovaGiornataBtn">Nuova giornata</button>
+          <button class="btn-danger" id="cancellaBtn">Cancella esercizio</button>
+        </div>
+      </div>
+      <div class="panel"><div class="section-title"><h2>Spiegazione operazione</h2></div><div id="spiegazione" class="small">Qui comparirà il testo che spiega in modo semplice cosa succede nella giornata.</div></div>
     </div>
-  </main>
+    <div class="grid">
+      <div class="panel"><div class="section-title"><h2>Scrittura della giornata</h2><span class="badge">Dare / Avere</span></div><table><thead><tr><th>Conto</th><th>Dare</th><th>Avere</th></tr></thead><tbody id="tabellaGiornata"></tbody></table></div>
+      <div class="panel"><div class="section-title"><h2>Mastrini generali</h2><span class="badge">Riassunto esercizio</span></div><div id="mastriniGenerali" class="journal"></div></div>
+    </div>
+    <div class="panel"><div class="section-title"><h2>Giornate salvate</h2><span class="badge" id="lastSave">Nessun salvataggio</span></div><div id="elencoGiornate" class="journal"></div></div>
+    <div class="footer-space"></div>
+  </div>
+<script>
+const LS_KEY='ai_partita_doppia_esercizio_v1';
+const state=JSON.parse(localStorage.getItem(LS_KEY)||'{"giornate":[],"mastrini":{},"consegna":""}');
+const el=id=>document.getElementById(id);
+const money=n=>(Math.round((n||0)*100)/100).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
+function save(){localStorage.setItem(LS_KEY,JSON.stringify(state));render();}
+function addM(name,d=0,a=0){if(!state.mastrini[name])state.mastrini[name]={dare:0,avere:0};state.mastrini[name].dare+=d;state.mastrini[name].avere+=a;}
+function parse(t){t=(t||'').toLowerCase();const e=[],x=[];const push=(c,d,a)=>e.push({conto:c,dare:d,avere:a});if(t.includes('ammort')){push('Ammortamento',1000,0);push('Fondo ammortamento',0,1000);x.push('Si rileva l’ammortamento e si incrementa il fondo ammortamento.')}if(t.includes('iva')){push('IVA a credito',0,220);push('IVA a debito',180,0);x.push('L’operazione coinvolge l’IVA.')}if(t.includes('banca')||t.includes('bonifico')){push('Banca c/c',500,0);x.push('Il pagamento o l’incasso passa dalla banca.')}if(t.includes('vend')){push('Ricavi di vendita',0,1000);x.push('Si registra un ricavo.')}if(t.includes('acqu')){push('Acquisti',700,0);x.push('Si registra un acquisto.')}if(t.includes('erario')){push('Erario c/IVA',0,40);x.push('Si aggiorna il conto Erario c/IVA.')}if(!e.length){push('Conto generico',100,100);x.push('Bozza di scrittura contabile in attesa di regole più precise.')}return {entries:e, explain:x.join(' ')};}
+function processDay(){const text=el('consegna').value.trim();if(!text)return;const day={id:Date.now(),text,...parse(text)};state.giornate.push(day);day.entries.forEach(r=>addM(r.conto,r.dare,r.avere));state.consegna='';el('consegna').value='';save();}
+function render(){el('spiegazione').textContent=state.giornate.length?state.giornate[state.giornate.length-1].explain:'Qui comparirà il testo che spiega in modo semplice cosa succede nella giornata.';el('tabellaGiornata').innerHTML=state.giornate.length?state.giornate[state.giornate.length-1].entries.map(r=>`<tr><td>${r.conto}</td><td>${r.dare?money(r.dare):''}</td><td>${r.avere?money(r.avere):''}</td></tr>`).join(''):'<tr><td colspan="3" class="muted">Nessuna scrittura ancora presente.</td></tr>';el('mastriniGenerali').innerHTML=Object.keys(state.mastrini).length?Object.entries(state.mastrini).map(([conto,v])=>`<div class="journal-item"><h4>${conto}</h4><div class="two"><div><div class="small">Dare</div><div>${money(v.dare)}</div></div><div><div class="small">Avere</div><div>${money(v.avere)}</div></div></div></div>`).join(''):'<div class="journal-item"><h4>Nessun mastrino</h4><div class="small">Inserisci la prima consegna per creare i mastrini generali.</div></div>';el('elencoGiornate').innerHTML=state.giornate.length?state.giornate.slice().reverse().map(g=>`<div class="journal-item"><h4>Giornata ${state.giornate.indexOf(g)+1}</h4><div class="small">${g.text}</div><div class="small" style="margin-top:8px">${g.explain}</div></div>`).join(''):'<div class="journal-item"><h4>Nessuna giornata salvata</h4><div class="small">Le giornate future verranno conservate qui senza cancellare quelle precedenti.</div></div>';el('lastSave').textContent=state.giornate.length?'Salvato':'Nessun salvataggio';}
+function clearEx(){if(confirm('Vuoi cancellare tutto l’esercizio?')){localStorage.removeItem(LS_KEY);location.reload();}}
+el('analizzaBtn').onclick=processDay;el('nuovaGiornataBtn').onclick=()=>{el('consegna').value='';state.consegna='';save()};el('cancellaBtn').onclick=clearEx;el('consegna').value=state.consegna||'';render();
+</script>
 </body>
-</html>
+</html>'''
+Path('output').mkdir(exist_ok=True)
+Path('output/index.html').write_text(html, encoding='utf-8')
+print('saved', len(html))
