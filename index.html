@@ -202,6 +202,29 @@
   </div>
 
   <script>
+    function aiAnalyze(text){
+    return {
+      type: 'ai_placeholder',
+      lines: [],
+      explanation: 'AI non ancora collegata. La struttura è pronta.',
+      balanced: true,
+      source: 'ai'
+    };
+  }
+
+  function processAiDay(){
+    const text = document.getElementById('consegna').value.trim();
+    const status = document.getElementById('status');
+    if(!text){
+      status.innerHTML = '<span class="bad">Inserisci una consegna prima di usare l’AI.</span>';
+      return;
+    }
+    const result = aiAnalyze(text);
+    status.innerHTML = '<span class="warn">AI non ancora collegata. La struttura è pronta.</span>';
+  }
+
+  document.getElementById('aiBtn').addEventListener('click', processAiDay);
+    
     const LS_KEY = 'ai_partita_doppia_start_v2';
     const defaultState = { giornate: [], mastrini: {}, consegna: '' };
     const state = JSON.parse(localStorage.getItem(LS_KEY) || JSON.stringify(defaultState));
@@ -453,28 +476,6 @@
     });
 
     render();
-  function aiAnalyze(text){
-    return {
-      type: 'ai_placeholder',
-      lines: [],
-      explanation: 'AI non ancora collegata. La struttura è pronta.',
-      balanced: true,
-      source: 'ai'
-    };
-  }
-
-  function processAiDay(){
-    const text = document.getElementById('consegna').value.trim();
-    const status = document.getElementById('status');
-    if(!text){
-      status.innerHTML = '<span class="bad">Inserisci una consegna prima di usare l’AI.</span>';
-      return;
-    }
-    const result = aiAnalyze(text);
-    status.innerHTML = '<span class="warn">AI non ancora collegata. La struttura è pronta.</span>';
-  }
-
-  document.getElementById('aiBtn').addEventListener('click', processAiDay);
 </script>
 </body>
 </html>
