@@ -1,1 +1,75 @@
-ciao
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test bottone</title>
+  <style>
+    body{
+      font-family: Arial, sans-serif;
+      background:#0b1220;
+      color:#e8eefc;
+      padding:20px;
+    }
+    .box{
+      max-width:700px;
+      margin:0 auto;
+      background:#111a2e;
+      border:1px solid #24314f;
+      border-radius:16px;
+      padding:16px;
+    }
+    textarea{
+      width:100%;
+      min-height:120px;
+      margin-top:10px;
+      border-radius:12px;
+      border:1px solid #314061;
+      background:#0b1220;
+      color:#e8eefc;
+      padding:12px;
+      box-sizing:border-box;
+      font-size:16px;
+    }
+    button{
+      margin-top:10px;
+      background:#4f7cff;
+      color:white;
+      border:none;
+      border-radius:12px;
+      padding:12px 18px;
+      font-size:16px;
+      cursor:pointer;
+    }
+    #output{
+      margin-top:16px;
+      padding:12px;
+      border-radius:12px;
+      background:#0b1220;
+      border:1px solid #263553;
+      white-space:pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Test pulsante</h1>
+    <textarea id="consegna">ciao</textarea>
+    <br>
+    <button id="analizzaBtn">Analizza consegna</button>
+    <div id="output">Premi il pulsante.</div>
+  </div>
+
+  <script>
+    const btn = document.getElementById("analizzaBtn");
+    const out = document.getElementById("output");
+    const txt = document.getElementById("consegna");
+
+    btn.onclick = function () {
+      alert("click ok");
+      out.textContent = "Hai scritto: " + txt.value;
+    };
+  </script>
+</body>
+</html>
+
