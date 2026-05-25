@@ -324,8 +324,8 @@
       el('consegna').value = state.consegna || '';
       const last = state.giornate[0];
       if(last){
-        el('outputAnalisi').textContent = `Tipo: ${last.type}\nFonte: ${last.source}\n\nSpiegazione:\n${last.explanation}`;
-        el('outputScrittura').textContent = last.lines.length ? last.lines.map(l => `${l.lato.toUpperCase()} | ${l.conto} | ${money(l.importo)}`).join('\n') : 'Nessuna scrittura generata.';
+        el('outputAnalisi').textContent = `Tipo: ${last.type}\\nFonte: ${last.source}\\n\\nSpiegazione:\\n${last.explanation}`;
+        el('outputScrittura').textContent = last.lines.length ? last.lines.map(l => `${l.lato.toUpperCase()} | ${l.conto} | ${money(l.importo)}`).join('\\n') : 'Nessuna scrittura generata.';
       } else {
         el('outputAnalisi').textContent = 'Nessuna analisi ancora.';
         el('outputScrittura').textContent = 'Nessuna scrittura ancora.';
