@@ -26,11 +26,7 @@
       background:radial-gradient(circle at top, #102244 0%, var(--bg) 55%);
       color:var(--text);
     }
-    .wrap{
-      max-width:1280px;
-      margin:0 auto;
-      padding:20px;
-    }
+    .wrap{max-width:1280px;margin:0 auto;padding:20px}
     .hero{
       padding:18px 20px;
       border:1px solid var(--line);
@@ -83,9 +79,7 @@
       cursor:pointer;
       color:white;
       background:var(--accent);
-      transition:.15s transform,.15s opacity;
     }
-    button:hover{transform:translateY(-1px);opacity:.96}
     button.secondary{background:#4f5f81}
     button.success{background:var(--accent2)}
     button.danger{background:var(--danger)}
@@ -152,7 +146,7 @@
   <div class="wrap">
     <div class="hero">
       <h1>AI Partita Doppia</h1>
-      <p>Versione stabile con motore base funzionante, storicizzazione delle giornate e spazio pronto per collegare l’AI in futuro.</p>
+      <p>Versione stabile con motore base funzionante e pulsante AI pronto ma non ancora collegato.</p>
     </div>
 
     <div class="grid top">
@@ -203,36 +197,20 @@
     const state = JSON.parse(localStorage.getItem(LS_KEY) || JSON.stringify(defaultState));
 
     const el = id => document.getElementById(id);
-    const money = n => (Math.round((n || 0) * 100) / 100).toLocaleString('it-IT', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
+    const money = n => (Math.round((n || 0) * 100) / 100).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    function save(){
-      localStorage.setItem(LS_KEY, JSON.stringify(state));
-      render();
-    }
+    function save(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); render(); }
 
     function addLedgerRow(conto, date, descrizione, dare, avere){
       if(!state.mastrini[conto]) state.mastrini[conto] = [];
       const rows = state.mastrini[conto];
       const prev = rows.length ? rows[rows.length - 1].saldo : 0;
       const delta = (dare || 0) - (avere || 0);
-      rows.push({
-         date,
-        descrizione,
-        dare: dare || 0,
-        avere: avere || 0,
-        saldo: prev + delta
-      });
+      rows.push({  date, descrizione, dare: dare || 0, avere: avere || 0, saldo: prev + delta });
     }
 
     function normalizeText(text){
-      return (text || '')
-        .toLowerCase()
-        .replace(/\s+/g, ' ')
-        .replace(/€/g, ' euro ')
-        .replace(/[\.,]/g, ' ');
+      return (text || '').toLowerCase().replace(/\s+/g, ' ').replace(/€/g, ' euro ').replace(/[\.,]/g, ' ');
     }
 
     function extractAmount(text){
@@ -241,8 +219,7 @@
         const raw = m[0].replace(/\s/g,'').replace(/\./g,'').replace(/,/g,'.');
         return Number(raw);
       }).filter(n => Number.isFinite(n) && n > 0);
-      if (!matches.length) return 1000;
-      return matches.reduce((a,b) => b > a ? b : a, matches[0]);
+      return matches.length ? matches.reduce((a,b) => b > a ? b : a, matches[0]) : 1000;
     }
 
     function extractIvaRate(text){
@@ -286,212 +263,88 @@
       if ((k.acq || k.mobile || k.bene || k.fornitore) && (k.banca || k.pagamento || k.fattura || k.iva)) {
         const contoDare = k.mobile || k.bene ? 'Mobilizzazioni materiali' : 'Merci c/acquisti';
         if (k.banca || /rimessa diretta/.test(t) || k.pagamento) {
-          return buildResult(
-            'acquisto_pagato_banca',
-            [
-              { conto: contoDare, lato: 'dare', importo: base },
-              { conto: 'IVA a credito', lato: 'dare', importo: iva },
-              { conto: 'Banca c/c', lato: 'avere', importo: total }
-            ],
-            `Rilevato acquisto pagato tramite banca: ${contoDare}, IVA a credito e uscita da banca.`,
-            'base'
-          );
+          return buildResult('acquisto_pagato_banca', [
+            { conto: contoDare, lato: 'dare', importo: base },
+            { conto: 'IVA a credito', lato: 'dare', importo: iva },
+            { conto: 'Banca c/c', lato: 'avere', importo: total }
+          ], `Rilevato acquisto pagato tramite banca: ${contoDare}, IVA a credito e uscita da banca.`, 'base');
         }
         if (k.fattura) {
-          return buildResult(
-            'acquisto_fattura',
-            [
-              { conto: contoDare, lato: 'dare', importo: base },
-              { conto: 'IVA a credito', lato: 'dare', importo: iva },
-              { conto: 'Debiti v/fornitori', lato: 'avere', importo: total }
-            ],
-            `Rilevato acquisto con fattura: ${contoDare}, IVA a credito e debito verso fornitore.`,
-            'base'
-          );
+          return buildResult('acquisto_fattura', [
+            { conto: contoDare, lato: 'dare', importo: base },
+            { conto: 'IVA a credito', lato: 'dare', importo: iva },
+            { conto: 'Debiti v/fornitori', lato: 'avere', importo: total }
+          ], `Rilevato acquisto con fattura: ${contoDare}, IVA a credito e debito verso fornitore.`, 'base');
         }
       }
 
-      if (k.vend && k.fattura) {
-        return buildResult(
-          'vendita_fattura',
-          [
-            { conto: 'Crediti v/clienti', lato: 'dare', importo: total },
-            { conto: 'Ricavi vendite', lato: 'avere', importo: base },
-            { conto: 'IVA a debito', lato: 'avere', importo: iva }
-          ],
-          'Rilevata vendita con fattura: credito verso cliente, ricavo e IVA a debito.',
-          'base'
-        );
-      }
+      if (k.vend && k.fattura) return buildResult('vendita_fattura', [
+        { conto: 'Crediti v/clienti', lato: 'dare', importo: total },
+        { conto: 'Ricavi vendite', lato: 'avere', importo: base },
+        { conto: 'IVA a debito', lato: 'avere', importo: iva }
+      ], 'Rilevata vendita con fattura: credito verso cliente, ricavo e IVA a debito.', 'base');
 
-      if (k.incasso && k.client) {
-        return buildResult(
-          'incasso_cliente',
-          [
-            { conto: 'Banca c/c', lato: 'dare', importo: base },
-            { conto: 'Crediti v/clienti', lato: 'avere', importo: base }
-          ],
-          'Rilevato incasso da cliente: aumenta la banca e si riduce il credito verso cliente.',
-          'base'
-        );
-      }
+      if (k.incasso && k.client) return buildResult('incasso_cliente', [
+        { conto: 'Banca c/c', lato: 'dare', importo: base },
+        { conto: 'Crediti v/clienti', lato: 'avere', importo: base }
+      ], 'Rilevato incasso da cliente: aumenta la banca e si riduce il credito verso cliente.', 'base');
 
-      if (k.pagamento && k.fornitore) {
-        return buildResult(
-          'pagamento_fornitore',
-          [
-            { conto: 'Debiti v/fornitori', lato: 'dare', importo: base },
-            { conto: 'Banca c/c', lato: 'avere', importo: base }
-          ],
-          'Rilevato pagamento a fornitore: si riduce il debito e esce liquidità dalla banca.',
-          'base'
-        );
-      }
+      if (k.pagamento && k.fornitore) return buildResult('pagamento_fornitore', [
+        { conto: 'Debiti v/fornitori', lato: 'dare', importo: base },
+        { conto: 'Banca c/c', lato: 'avere', importo: base }
+      ], 'Rilevato pagamento a fornitore: si riduce il debito e esce liquidità dalla banca.', 'base');
 
-      if (k.personale) {
-        return buildResult(
-          'personale',
-          [
-            { conto: 'Costi per il personale', lato: 'dare', importo: base },
-            { conto: 'Debiti v/personale', lato: 'avere', importo: base }
-          ],
-          'Rilevato costo per il personale.',
-          'base'
-        );
-      }
+      if (k.personale) return buildResult('personale', [
+        { conto: 'Costi per il personale', lato: 'dare', importo: base },
+        { conto: 'Debiti v/personale', lato: 'avere', importo: base }
+      ], 'Rilevato costo per il personale.', 'base');
 
-      return buildResult(
-        'generica',
-        [],
-        'Operazione generica: il motore base non è riuscito a riconoscere con sicurezza la consegna.',
-        'base'
-      );
-    }
-
-    function analyzeEntry(text){
-      return localAnalyze(text);
+      return buildResult('generica', [], 'Operazione generica: il motore base non è riuscito a riconoscere con sicurezza la consegna.', 'base');
     }
 
     function processResult(text, result){
       const day = new Date().toLocaleDateString('it-IT');
       const time = new Date().toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
-
       if (result.lines && result.lines.length) {
-        result.lines.forEach(line => {
-          addLedgerRow(
-            line.conto,
-            day,
-            text,
-            line.lato === 'dare' ? line.importo : 0,
-            line.lato === 'avere' ? line.importo : 0
-          );
-        });
+        result.lines.forEach(line => addLedgerRow(line.conto, day, text, line.lato === 'dare' ? line.importo : 0, line.lato === 'avere' ? line.importo : 0));
       }
-
-      state.giornate.unshift({
-         `${day} ${time}`,
-        consegna: text,
-        type: result.type,
-        explanation: result.explanation,
-        lines: result.lines || [],
-        source: result.source || 'base'
-      });
+      state.giornate.unshift({  `${day} ${time}`, consegna: text, type: result.type, explanation: result.explanation, lines: result.lines || [], source: result.source || 'base' });
       state.consegna = text;
-
-      el('status').innerHTML = result.balanced
-        ? `<span class="ok">Scrittura bilanciata e salvata. Motore: ${result.source || 'base'}.</span>`
-        : `<span class="bad">Attenzione: scrittura non bilanciata o operazione generica. Motore: ${result.source || 'base'}.</span>`;
-
+      el('status').innerHTML = result.balanced ? `<span class="ok">Scrittura bilanciata e salvata. Motore: ${result.source || 'base'}.</span>` : `<span class="bad">Attenzione: scrittura non bilanciata o operazione generica. Motore: ${result.source || 'base'}.</span>`;
       save();
     }
 
     function processDay(){
       const text = el('consegna').value.trim();
-      if(!text){
-        el('status').innerHTML = '<span class="bad">Inserisci una consegna prima di analizzare.</span>';
-        return;
-      }
-      processResult(text, analyzeEntry(text));
+      if(!text){ el('status').innerHTML = '<span class="bad">Inserisci una consegna prima di analizzare.</span>'; return; }
+      processResult(text, localAnalyze(text));
     }
 
     function render(){
       el('consegna').value = state.consegna || '';
-
       const last = state.giornate[0];
       if(last){
         el('outputAnalisi').textContent = `Tipo: ${last.type}\nFonte: ${last.source}\n\nSpiegazione:\n${last.explanation}`;
-        el('outputScrittura').textContent = last.lines.length
-          ? last.lines.map(l => `${l.lato.toUpperCase()} | ${l.conto} | ${money(l.importo)}`).join('\n')
-          : 'Nessuna scrittura generata.';
+        el('outputScrittura').textContent = last.lines.length ? last.lines.map(l => `${l.lato.toUpperCase()} | ${l.conto} | ${money(l.importo)}`).join('\n') : 'Nessuna scrittura generata.';
       } else {
         el('outputAnalisi').textContent = 'Nessuna analisi ancora.';
         el('outputScrittura').textContent = 'Nessuna scrittura ancora.';
       }
 
       const ledgers = Object.keys(state.mastrini);
-      if(!ledgers.length){
-        el('outputMastrini').innerHTML = '<span class="muted">Nessun mastrino ancora.</span>';
-      } else {
-        el('outputMastrini').innerHTML = ledgers.map(conto => {
-          const rows = state.mastrini[conto];
-          const lastSaldo = rows[rows.length - 1].saldo;
-          const tableRows = rows.map(r => `
-            <tr>
-              <td>${r.data}</td>
-              <td>${r.descrizione}</td>
-              <td>${money(r.dare)}</td>
-              <td>${money(r.avere)}</td>
-              <td>${money(r.saldo)}</td>
-            </tr>
-          `).join('');
-          return `
-            <div class="day">
-              <strong>${conto}</strong>
-              <div class="small muted">Saldo attuale: ${money(lastSaldo)}</div>
-              <div class="ledger-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Data</th>
-                      <th>Descrizione</th>
-                      <th>Dare</th>
-                      <th>Avere</th>
-                      <th>Saldo</th>
-                    </tr>
-                  </thead>
-                  <tbody>${tableRows}</tbody>
-                </table>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
+      el('outputMastrini').innerHTML = !ledgers.length ? '<span class="muted">Nessun mastrino ancora.</span>' : ledgers.map(conto => {
+        const rows = state.mastrini[conto];
+        const lastSaldo = rows[rows.length - 1].saldo;
+        const tableRows = rows.map(r => `<tr><td>${r.data}</td><td>${r.descrizione}</td><td>${money(r.dare)}</td><td>${money(r.avere)}</td><td>${money(r.saldo)}</td></tr>`).join('');
+        return `<div class="day"><strong>${conto}</strong><div class="small muted">Saldo attuale: ${money(lastSaldo)}</div><div class="ledger-wrap"><table><thead><tr><th>Data</th><th>Descrizione</th><th>Dare</th><th>Avere</th><th>Saldo</th></tr></thead><tbody>${tableRows}</tbody></table></div></div>`;
+      }).join('');
 
-      if(!state.giornate.length){
-        el('outputGiornate').innerHTML = '<span class="muted">Nessuna giornata salvata.</span>';
-      } else {
-        el('outputGiornate').innerHTML = state.giornate.map(g => `
-          <div class="day">
-            <strong>${g.data}</strong>
-            <div class="small warn">${g.type}</div>
-            <div class="small" style="margin-top:6px">${g.consegna}</div>
-          </div>
-        `).join('');
-      }
+      el('outputGiornate').innerHTML = !state.giornate.length ? '<span class="muted">Nessuna giornata salvata.</span>' : state.giornate.map(g => `<div class="day"><strong>${g.data}</strong><div class="small warn">${g.type}</div><div class="small" style="margin-top:6px">${g.consegna}</div></div>`).join('');
     }
 
     el('analizzaBtn').addEventListener('click', processDay);
-
-    el('aiBtn').addEventListener('click', () => {
-      el('status').innerHTML = '<span class="warn">AI non ancora collegata. La struttura è pronta.</span>';
-    });
-
-    el('nuovaBtn').addEventListener('click', () => {
-      el('consegna').value = '';
-      state.consegna = '';
-      save();
-    });
-
+    el('aiBtn').addEventListener('click', () => { el('status').innerHTML = '<span class="warn">AI non ancora collegata. La struttura è pronta.</span>'; });
+    el('nuovaBtn').addEventListener('click', () => { el('consegna').value = ''; state.consegna = ''; save(); });
     el('resetBtn').addEventListener('click', () => {
       if(!confirm('Vuoi azzerare tutto?')) return;
       state.giornate = [];
