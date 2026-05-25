@@ -1,161 +1,310 @@
-from pathlib import Path
-html = '''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="pragma" content="no-cache" />
-  <meta http-equiv="expires" content="0" />
   <title>AI Partita Doppia</title>
   <style>
-    :root{--bg:#07111f;--panel:#0f172a;--panel2:#111c33;--text:#e5e7eb;--muted:#94a3b8;--line:#22304a;--accent:#38bdf8;--accent2:#2563eb;--danger:#ef4444;--success:#22c55e;--warn:#f59e0b}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:radial-gradient(circle at top,rgba(56,189,248,.14),transparent 32%),linear-gradient(180deg,#020617 0%,var(--bg) 100%);color:var(--text)}
-    .wrap{max-width:1400px;margin:0 auto;padding:20px;display:grid;gap:16px}
-    .hero,.panel{background:rgba(15,23,42,.88);border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 50px rgba(0,0,0,.28)}
-    .hero{padding:24px}.hero h1{margin:0 0 10px;font-size:clamp(30px,5vw,54px);line-height:1}.hero p{margin:0;color:var(--muted);line-height:1.7;max-width:84ch}
-    .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px}.panel{padding:16px}
-    .section{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}.section h2{margin:0;font-size:18px}
-    .badge{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;background:#08111f;border:1px solid var(--line);font-size:12px;color:#cbd5e1}
-    textarea{width:100%;min-height:190px;resize:vertical;background:#08111f;color:var(--text);border:1px solid var(--line);border-radius:14px;padding:14px;font:inherit;outline:none}
-    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    button{border:0;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;font:inherit}
-    .primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}.secondary{background:#1f2937;color:#fff;border:1px solid var(--line)}.danger{background:var(--danger);color:#fff}
-    .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.card{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:14px}.card h3{margin:0 0 8px;font-size:14px;color:#cbd5e1}.card .val{font-size:20px;font-weight:800}
-    .split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-    table{width:100%;border-collapse:collapse;border-radius:14px;overflow:hidden} th,td{border-bottom:1px solid var(--line);padding:10px;text-align:left;vertical-align:top} th{background:#08111f;color:#cbd5e1}
-    .journal{display:grid;gap:10px}.item{background:#08111f;border:1px solid var(--line);border-radius:16px;padding:12px}.item h4{margin:0 0 8px}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .small{color:var(--muted);font-size:13px;line-height:1.6}.credit{color:#fca5a5}.debit{color:#86efac}.sticky{position:sticky;top:12px}.footer{height:18px}.money{font-variant-numeric:tabular-nums}
-    @media (max-width: 1100px){.grid,.split,.cards{grid-template-columns:1fr}.sticky{position:static}}
+    body{
+      margin:0;
+      font-family:Arial, sans-serif;
+      background:#0b1220;
+      color:#e8eefc;
+    }
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+      padding:20px;
+    }
+    .card{
+      background:#111a2e;
+      border:1px solid #24314f;
+      border-radius:16px;
+      padding:16px;
+      margin-bottom:16px;
+      box-shadow:0 8px 24px rgba(0,0,0,.25);
+    }
+    h1,h2{
+      margin-top:0;
+    }
+    textarea{
+      width:100%;
+      min-height:120px;
+      border-radius:12px;
+      border:1px solid #314061;
+      background:#0b1220;
+      color:#e8eefc;
+      padding:12px;
+      box-sizing:border-box;
+      font-size:16px;
+      resize:vertical;
+    }
+    button{
+      background:#4f7cff;
+      color:white;
+      border:none;
+      border-radius:12px;
+      padding:12px 18px;
+      font-size:16px;
+      cursor:pointer;
+      margin-right:8px;
+      margin-top:10px;
+    }
+    button.red{background:#d84d4d;}
+    button.gray{background:#48536a;}
+    .grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:16px;
+    }
+    @media(min-width:900px){
+      .grid{grid-template-columns:1fr 1fr;}
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:8px;
+      font-size:14px;
+    }
+    th,td{
+      border:1px solid #2a3858;
+      padding:8px;
+      text-align:left;
+    }
+    th{
+      background:#16213a;
+    }
+    .muted{color:#9fb0d0;}
+    .ok{color:#7dffb2;}
+    .bad{color:#ff8f8f;}
+    .small{font-size:13px;}
+    .box{
+      background:#0b1220;
+      border:1px solid #263553;
+      border-radius:12px;
+      padding:12px;
+      margin-top:10px;
+      white-space:pre-wrap;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="hero">
-      <span class="badge">Partita Doppia AI</span>
-      <h1>Un’app potente per risolvere gli esercizi di partita doppia.</h1>
-      <p>Incolli la consegna, l’app la analizza, crea la scrittura della giornata, spiega cosa succede e aggiorna i mastrini generali per tutta la durata dell’esercizio.</p>
+    <div class="card">
+      <h1>AI Partita Doppia</h1>
+      <p class="muted">Incolla una consegna semplice e premi Analizza consegna.</p>
+      <textarea id="consegna" placeholder="Esempio: acquisto di merci con fattura"></textarea>
+      <div>
+        <button id="analizzaBtn">Analizza consegna</button>
+        <button id="nuovaBtn" class="gray">Nuova giornata</button>
+        <button id="resetBtn" class="red">Azzera tutto</button>
+      </div>
+      <div id="status" class="small muted" style="margin-top:10px;"></div>
     </div>
 
     <div class="grid">
-      <div class="panel">
-        <div class="section"><h2>Consegna della giornata</h2><span class="badge">Salvataggio automatico</span></div>
-        <textarea id="consegna" placeholder="Incolla qui la consegna della giornata..."></textarea>
-        <div class="row">
-          <button class="primary" id="analizzaBtn">Analizza consegna</button>
-          <button class="secondary" id="nuovaGiornataBtn">Nuova giornata</button>
-          <button class="danger" id="cancellaBtn">Cancella esercizio</button>
-        </div>
+      <div class="card">
+        <h2>Analisi</h2>
+        <div id="outputAnalisi" class="box muted">Nessuna analisi ancora.</div>
       </div>
-
-      <div class="panel sticky">
-        <div class="section"><h2>Stato esercizio</h2><span class="badge" id="giornateCount">0 giornate</span></div>
-        <div class="cards">
-          <div class="card"><h3>Giornata attiva</h3><div class="val" id="giornataAttiva">1</div></div>
-          <div class="card"><h3>Movimenti</h3><div class="val" id="movimentiTot">0</div></div>
-          <div class="card"><h3>Conti</h3><div class="val" id="contiTot">0</div></div>
-          <div class="card"><h3>IVA netta</h3><div class="val money" id="ivaNetta">0,00</div></div>
-        </div>
+      <div class="card">
+        <h2>Scrittura</h2>
+        <div id="outputScrittura" class="box muted">Nessuna scrittura ancora.</div>
       </div>
     </div>
 
-    <div class="split">
-      <div class="panel">
-        <div class="section"><h2>Scrittura della giornata</h2><span class="badge">Dare / Avere</span></div>
-        <table>
-          <thead><tr><th>Conto</th><th>Dare</th><th>Avere</th></tr></thead>
-          <tbody id="tabellaGiornata"></tbody>
-        </table>
-      </div>
-
-      <div class="panel">
-        <div class="section"><h2>Spiegazione operazione</h2><span class="badge">Sintesi IA</span></div>
-        <div id="spiegazione" class="small">Qui comparirà il testo che spiega in modo semplice cosa succede nella giornata.</div>
-      </div>
+    <div class="card">
+      <h2>Mastrini</h2>
+      <div id="outputMastrini" class="muted">Nessun mastrino ancora.</div>
     </div>
 
-    <div class="split">
-      <div class="panel">
-        <div class="section"><h2>Mastrini generali</h2><span class="badge">Riassunto esercizio</span></div>
-        <div id="mastriniGenerali" class="journal"></div>
-      </div>
-
-      <div class="panel">
-        <div class="section"><h2>Giornate salvate</h2><span class="badge" id="lastSave">Nessun salvataggio</span></div>
-        <div id="elencoGiornate" class="journal"></div>
-      </div>
+    <div class="card">
+      <h2>Giornate salvate</h2>
+      <div id="outputGiornate" class="muted">Nessuna giornata salvata.</div>
     </div>
-
-    <div class="footer"></div>
   </div>
 
-<script>
-function analyzeEntry(text) {
-  const t = text.toLowerCase();
+  <script>
+    const LS_KEY = 'ai_partita_doppia_esercizio_v4';
+    const defaultState = { giornate: [], mastrini: {}, consegna: '' };
+    const state = JSON.parse(localStorage.getItem(LS_KEY) || JSON.stringify(defaultState));
 
-  let type = "generica";
-  let lines = [];
-  let explanation = "";
+    const el = id => document.getElementById(id);
+    const money = n => (Math.round((n || 0) * 100) / 100).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-  if (t.includes("acquisto") && t.includes("fattura")) {
-    type = "acquisto_fattura";
-    lines = [
-      { conto: "Merci c/acquisti", lato: "dare", importo: 1000 },
-      { conto: "IVA a credito", lato: "dare", importo: 220 },
-      { conto: "Debiti v/fornitori", lato: "avere", importo: 1220 }
-    ];
-    explanation = "Rilevato acquisto con IVA: aumento costi e credito IVA, nasce un debito verso fornitore.";
-  }
-
-  if (t.includes("vendita") && t.includes("fattura")) {
-    type = "vendita_fattura";
-    lines = [
-      { conto: "Crediti v/clienti", lato: "dare", importo: 1220 },
-      { conto: "Ricavi vendite", lato: "avere", importo: 1000 },
-      { conto: "IVA a debito", lato: "avere", importo: 220 }
-    ];
-    explanation = "Rilevata vendita con fattura: nasce credito verso cliente, ricavo e IVA a debito.";
-  }
-
-  return { type, lines, explanation };
-}
-
-function updateLedgers(lines, ledgers, date, description) {
-  lines.forEach(line => {
-    if (!ledgers[line.conto]) {
-      ledgers[line.conto] = [];
+    function save() {
+      localStorage.setItem(LS_KEY, JSON.stringify(state));
+      render();
     }
 
-    const lastBalance = ledgers[line.conto].length
-      ? ledgers[line.conto][ledgers[line.conto].length - 1].saldo
-      : 0;
+    function addLedgerRow(conto, date, descrizione, dare, avere) {
+      if (!state.mastrini[conto]) state.mastrini[conto] = [];
+      const prev = state.mastrini[conto].length ? state.mastrini[conto][state.mastrini[conto].length - 1].saldo : 0;
+      const delta = (dare || 0) - (avere || 0);
+      state.mastrini[conto].push({
+         date,
+        descrizione,
+        dare: dare || 0,
+        avere: avere || 0,
+        saldo: prev + delta
+      });
+    }
 
-    const delta = line.lato === "dare" ? line.importo : -line.importo;
-    const saldo = lastBalance + delta;
+    function analyzeEntry(text) {
+      const t = (text || '').toLowerCase();
+      let type = 'generica';
+      let lines = [];
+      let explanation = 'Operazione non riconosciuta con sicurezza.';
 
-    ledgers[line.conto].push({
-      data: date,
-      descrizione: description,
-      dare: line.lato === "dare" ? line.importo : 0,
-      avere: line.lato === "avere" ? line.importo : 0,
-      saldo
+      if (t.includes('acquisto') && t.includes('fattura')) {
+        type = 'acquisto_fattura';
+        lines = [
+          { conto: 'Merci c/acquisti', lato: 'dare', importo: 1000 },
+          { conto: 'IVA a credito', lato: 'dare', importo: 220 },
+          { conto: 'Debiti v/fornitori', lato: 'avere', importo: 1220 }
+        ];
+        explanation = 'Rilevato acquisto con fattura: costo, IVA a credito e debito verso fornitore.';
+      } else if (t.includes('vendita') && t.includes('fattura')) {
+        type = 'vendita_fattura';
+        lines = [
+          { conto: 'Crediti v/clienti', lato: 'dare', importo: 1220 },
+          { conto: 'Ricavi vendite', lato: 'avere', importo: 1000 },
+          { conto: 'IVA a debito', lato: 'avere', importo: 220 }
+        ];
+        explanation = 'Rilevata vendita con fattura: credito verso cliente, ricavo e IVA a debito.';
+      } else if (t.includes('incasso') && t.includes('cliente')) {
+        type = 'incasso_cliente';
+        lines = [
+          { conto: 'Banca c/c', lato: 'dare', importo: 1000 },
+          { conto: 'Crediti v/clienti', lato: 'avere', importo: 1000 }
+        ];
+        explanation = 'Rilevato incasso da cliente: aumenta la banca e si riduce il credito verso cliente.';
+      } else if (t.includes('pag') && t.includes('fornit')) {
+        type = 'pagamento_fornitore';
+        lines = [
+          { conto: 'Debiti v/fornitori', lato: 'dare', importo: 1000 },
+          { conto: 'Banca c/c', lato: 'avere', importo: 1000 }
+        ];
+        explanation = 'Rilevato pagamento a fornitore: si riduce il debito e esce liquidità dalla banca.';
+      }
+
+      const balance = lines.reduce((s, r) => s + (r.lato === 'dare' ? r.importo : -r.importo), 0);
+      return { type, lines, explanation, balanced: Math.abs(balance) < 0.01 };
+    }
+
+    function processDay() {
+      const text = el('consegna').value.trim();
+      if (!text) {
+        el('status').innerHTML = '<span class="bad">Inserisci una consegna prima di analizzare.</span>';
+        return;
+      }
+
+      const result = analyzeEntry(text);
+      const day = new Date().toLocaleDateString('it-IT');
+      const time = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+
+      result.lines.forEach(line => {
+        addLedgerRow(
+          line.conto,
+          day,
+          text,
+          line.lato === 'dare' ? line.importo : 0,
+          line.lato === 'avere' ? line.importo : 0
+        );
+      });
+
+      state.giornate.unshift({
+         `${day} ${time}`,
+        consegna: text,
+        type: result.type,
+        explanation: result.explanation,
+        lines: result.lines
+      });
+      state.consegna = text;
+
+      el('status').innerHTML = result.balanced
+        ? '<span class="ok">Scrittura bilanciata e salvata.</span>'
+        : '<span class="bad">Attenzione: scrittura non bilanciata.</span>';
+
+      save();
+    }
+
+    function render() {
+      el('consegna').value = state.consegna || '';
+
+      const last = state.giornate[0];
+      if (last) {
+        el('outputAnalisi').textContent =
+          `Tipo: ${last.type}\n\nSpiegazione:\n${last.explanation}`;
+        el('outputScrittura').textContent =
+          last.lines.map(l => `${l.lato.toUpperCase()} | ${l.conto} | ${money(l.importo)}`).join('\n');
+      } else {
+        el('outputAnalisi').textContent = 'Nessuna analisi ancora.';
+        el('outputScrittura').textContent = 'Nessuna scrittura ancora.';
+      }
+
+      const ledgers = Object.keys(state.mastrini);
+      if (!ledgers.length) {
+        el('outputMastrini').innerHTML = 'Nessun mastrino ancora.';
+      } else {
+        el('outputMastrini').innerHTML = ledgers.map(conto => {
+          const rows = state.mastrini[conto];
+          const lastSaldo = rows[rows.length - 1].saldo;
+          const tableRows = rows.map(r => `
+            <tr>
+              <td>${r.data}</td>
+              <td>${r.descrizione}</td>
+              <td>${money(r.dare)}</td>
+              <td>${money(r.avere)}</td>
+              <td>${money(r.saldo)}</td>
+            </tr>
+          `).join('');
+          return `
+            <div class="box">
+              <strong>${conto}</strong> — saldo: ${money(lastSaldo)}
+              <table>
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Descrizione</th>
+                    <th>Dare</th>
+                    <th>Avere</th>
+                    <th>Saldo</th>
+                  </tr>
+                </thead>
+                <tbody>${tableRows}</tbody>
+              </table>
+            </div>
+          `;
+        }).join('');
+      }
+
+      if (!state.giornate.length) {
+        el('outputGiornate').textContent = 'Nessuna giornata salvata.';
+      } else {
+        el('outputGiornate').innerHTML = state.giornate.map(g =>
+          `<div class="box"><strong>${g.data}</strong><br>${g.type}<br>${g.consegna}</div>`
+        ).join('');
+      }
+    }
+
+    el('analizzaBtn').addEventListener('click', processDay);
+
+    el('nuovaBtn').addEventListener('click', () => {
+      el('consegna').value = '';
+      state.consegna = '';
+      save();
     });
-  });
 
-  return ledgers;
-}
-function processDay() {
-  const text = document.getElementById("consegna").value;
-  const result = analyzeEntry(text);
+    el('resetBtn').addEventListener('click', () => {
+      if (!confirm('Vuoi azzerare tutto?')) return;
+      state.giornate = [];
+      state.mastrini = {};
+      state.consegna = '';
+      save();
+    });
 
-  ledgers = updateLedgers(
-    result.lines,
-    ledgers,
-    new Date().toLocaleDateString("it-IT"),
-    text
-  );
-
-  renderResult(result);
-  renderLedgers(ledgers);
-}  
+    render();
+  </script>
+</body>
+</html>
