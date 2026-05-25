@@ -3,33 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Partita Doppia</title>
+  <title>Test AI Partita Doppia</title>
   <style>
     body{
-      margin:0;
-      font-family:Arial, sans-serif;
+      font-family: Arial, sans-serif;
       background:#0b1220;
       color:#e8eefc;
-    }
-    .wrap{
-      max-width:1100px;
-      margin:0 auto;
       padding:20px;
     }
-    .card{
+    .box{
+      max-width:800px;
+      margin:0 auto;
       background:#111a2e;
       border:1px solid #24314f;
       border-radius:16px;
       padding:16px;
-      margin-bottom:16px;
-      box-shadow:0 8px 24px rgba(0,0,0,.25);
-    }
-    h1,h2{
-      margin-top:0;
     }
     textarea{
       width:100%;
       min-height:120px;
+      margin-top:10px;
       border-radius:12px;
       border:1px solid #314061;
       background:#0b1220;
@@ -37,9 +30,9 @@
       padding:12px;
       box-sizing:border-box;
       font-size:16px;
-      resize:vertical;
     }
     button{
+      margin-top:10px;
       background:#4f7cff;
       color:white;
       border:none;
@@ -47,264 +40,41 @@
       padding:12px 18px;
       font-size:16px;
       cursor:pointer;
-      margin-right:8px;
-      margin-top:10px;
     }
-    button.red{background:#d84d4d;}
-    button.gray{background:#48536a;}
-    .grid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:16px;
-    }
-    @media(min-width:900px){
-      .grid{grid-template-columns:1fr 1fr;}
-    }
-    table{
-      width:100%;
-      border-collapse:collapse;
-      margin-top:8px;
-      font-size:14px;
-    }
-    th,td{
-      border:1px solid #2a3858;
-      padding:8px;
-      text-align:left;
-    }
-    th{
-      background:#16213a;
-    }
-    .muted{color:#9fb0d0;}
-    .ok{color:#7dffb2;}
-    .bad{color:#ff8f8f;}
-    .small{font-size:13px;}
-    .box{
+    .out{
+      margin-top:16px;
+      padding:12px;
+      border-radius:12px;
       background:#0b1220;
       border:1px solid #263553;
-      border-radius:12px;
-      padding:12px;
-      margin-top:10px;
       white-space:pre-wrap;
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1>AI Partita Doppia</h1>
-      <p class="muted">Incolla una consegna semplice e premi Analizza consegna.</p>
-      <textarea id="consegna" placeholder="Esempio: acquisto di merci con fattura"></textarea>
-      <div>
-        <button id="analizzaBtn">Analizza consegna</button>
-        <button id="nuovaBtn" class="gray">Nuova giornata</button>
-        <button id="resetBtn" class="red">Azzera tutto</button>
-      </div>
-      <div id="status" class="small muted" style="margin-top:10px;"></div>
-    </div>
-
-    <div class="grid">
-      <div class="card">
-        <h2>Analisi</h2>
-        <div id="outputAnalisi" class="box muted">Nessuna analisi ancora.</div>
-      </div>
-      <div class="card">
-        <h2>Scrittura</h2>
-        <div id="outputScrittura" class="box muted">Nessuna scrittura ancora.</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Mastrini</h2>
-      <div id="outputMastrini" class="muted">Nessun mastrino ancora.</div>
-    </div>
-
-    <div class="card">
-      <h2>Giornate salvate</h2>
-      <div id="outputGiornate" class="muted">Nessuna giornata salvata.</div>
-    </div>
+  <div class="box">
+    <h1>Test analisi</h1>
+    <textarea id="consegna" placeholder="Scrivi una consegna facile, ad esempio: acquisto di merci con fattura"></textarea>
+    <br>
+    <button id="analizzaBtn">Analizza consegna</button>
+    <div id="output" class="out">Nessun risultato ancora.</div>
   </div>
 
   <script>
-    const LS_KEY = 'ai_partita_doppia_esercizio_v4';
-    const defaultState = { giornate: [], mastrini: {}, consegna: '' };
-    const state = JSON.parse(localStorage.getItem(LS_KEY) || JSON.stringify(defaultState));
+    const btn = document.getElementById('analizzaBtn');
+    const out = document.getElementById('output');
+    const txt = document.getElementById('consegna');
 
-    const el = id => document.getElementById(id);
-    const money = n => (Math.round((n || 0) * 100) / 100).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-    function save() {
-      localStorage.setItem(LS_KEY, JSON.stringify(state));
-      render();
-    }
-
-    function addLedgerRow(conto, date, descrizione, dare, avere) {
-      if (!state.mastrini[conto]) state.mastrini[conto] = [];
-      const prev = state.mastrini[conto].length ? state.mastrini[conto][state.mastrini[conto].length - 1].saldo : 0;
-      const delta = (dare || 0) - (avere || 0);
-      state.mastrini[conto].push({
-         date,
-        descrizione,
-        dare: dare || 0,
-        avere: avere || 0,
-        saldo: prev + delta
-      });
-    }
-
-    function analyzeEntry(text) {
-      const t = (text || '').toLowerCase();
-      let type = 'generica';
-      let lines = [];
-      let explanation = 'Operazione non riconosciuta con sicurezza.';
-
-      if (t.includes('acquisto') && t.includes('fattura')) {
-        type = 'acquisto_fattura';
-        lines = [
-          { conto: 'Merci c/acquisti', lato: 'dare', importo: 1000 },
-          { conto: 'IVA a credito', lato: 'dare', importo: 220 },
-          { conto: 'Debiti v/fornitori', lato: 'avere', importo: 1220 }
-        ];
-        explanation = 'Rilevato acquisto con fattura: costo, IVA a credito e debito verso fornitore.';
-      } else if (t.includes('vendita') && t.includes('fattura')) {
-        type = 'vendita_fattura';
-        lines = [
-          { conto: 'Crediti v/clienti', lato: 'dare', importo: 1220 },
-          { conto: 'Ricavi vendite', lato: 'avere', importo: 1000 },
-          { conto: 'IVA a debito', lato: 'avere', importo: 220 }
-        ];
-        explanation = 'Rilevata vendita con fattura: credito verso cliente, ricavo e IVA a debito.';
-      } else if (t.includes('incasso') && t.includes('cliente')) {
-        type = 'incasso_cliente';
-        lines = [
-          { conto: 'Banca c/c', lato: 'dare', importo: 1000 },
-          { conto: 'Crediti v/clienti', lato: 'avere', importo: 1000 }
-        ];
-        explanation = 'Rilevato incasso da cliente: aumenta la banca e si riduce il credito verso cliente.';
-      } else if (t.includes('pag') && t.includes('fornit')) {
-        type = 'pagamento_fornitore';
-        lines = [
-          { conto: 'Debiti v/fornitori', lato: 'dare', importo: 1000 },
-          { conto: 'Banca c/c', lato: 'avere', importo: 1000 }
-        ];
-        explanation = 'Rilevato pagamento a fornitore: si riduce il debito e esce liquidità dalla banca.';
-      }
-
-      const balance = lines.reduce((s, r) => s + (r.lato === 'dare' ? r.importo : -r.importo), 0);
-      return { type, lines, explanation, balanced: Math.abs(balance) < 0.01 };
-    }
-
-    function processDay() {
-      const text = el('consegna').value.trim();
+    btn.addEventListener('click', () => {
+      const text = txt.value.trim();
       if (!text) {
-        el('status').innerHTML = '<span class="bad">Inserisci una consegna prima di analizzare.</span>';
+        out.textContent = 'Inserisci una consegna.';
         return;
       }
 
-      const result = analyzeEntry(text);
-      const day = new Date().toLocaleDateString('it-IT');
-      const time = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-
-      result.lines.forEach(line => {
-        addLedgerRow(
-          line.conto,
-          day,
-          text,
-          line.lato === 'dare' ? line.importo : 0,
-          line.lato === 'avere' ? line.importo : 0
-        );
-      });
-
-      state.giornate.unshift({
-         `${day} ${time}`,
-        consegna: text,
-        type: result.type,
-        explanation: result.explanation,
-        lines: result.lines
-      });
-      state.consegna = text;
-
-      el('status').innerHTML = result.balanced
-        ? '<span class="ok">Scrittura bilanciata e salvata.</span>'
-        : '<span class="bad">Attenzione: scrittura non bilanciata.</span>';
-
-      save();
-    }
-
-    function render() {
-      el('consegna').value = state.consegna || '';
-
-      const last = state.giornate[0];
-      if (last) {
-        el('outputAnalisi').textContent =
-          `Tipo: ${last.type}\n\nSpiegazione:\n${last.explanation}`;
-        el('outputScrittura').textContent =
-          last.lines.map(l => `${l.lato.toUpperCase()} | ${l.conto} | ${money(l.importo)}`).join('\n');
-      } else {
-        el('outputAnalisi').textContent = 'Nessuna analisi ancora.';
-        el('outputScrittura').textContent = 'Nessuna scrittura ancora.';
-      }
-
-      const ledgers = Object.keys(state.mastrini);
-      if (!ledgers.length) {
-        el('outputMastrini').innerHTML = 'Nessun mastrino ancora.';
-      } else {
-        el('outputMastrini').innerHTML = ledgers.map(conto => {
-          const rows = state.mastrini[conto];
-          const lastSaldo = rows[rows.length - 1].saldo;
-          const tableRows = rows.map(r => `
-            <tr>
-              <td>${r.data}</td>
-              <td>${r.descrizione}</td>
-              <td>${money(r.dare)}</td>
-              <td>${money(r.avere)}</td>
-              <td>${money(r.saldo)}</td>
-            </tr>
-          `).join('');
-          return `
-            <div class="box">
-              <strong>${conto}</strong> — saldo: ${money(lastSaldo)}
-              <table>
-                <thead>
-                  <tr>
-                    <th>Data</th>
-                    <th>Descrizione</th>
-                    <th>Dare</th>
-                    <th>Avere</th>
-                    <th>Saldo</th>
-                  </tr>
-                </thead>
-                <tbody>${tableRows}</tbody>
-              </table>
-            </div>
-          `;
-        }).join('');
-      }
-
-      if (!state.giornate.length) {
-        el('outputGiornate').textContent = 'Nessuna giornata salvata.';
-      } else {
-        el('outputGiornate').innerHTML = state.giornate.map(g =>
-          `<div class="box"><strong>${g.data}</strong><br>${g.type}<br>${g.consegna}</div>`
-        ).join('');
-      }
-    }
-
-    el('analizzaBtn').addEventListener('click', processDay);
-
-    el('nuovaBtn').addEventListener('click', () => {
-      el('consegna').value = '';
-      state.consegna = '';
-      save();
+      out.textContent = 'Hai cliccato. Test riuscito.\n\nConsegna inserita:\n' + text;
+      alert('click ok');
     });
-
-    el('resetBtn').addEventListener('click', () => {
-      if (!confirm('Vuoi azzerare tutto?')) return;
-      state.giornate = [];
-      state.mastrini = {};
-      state.consegna = '';
-      save();
-    });
-
-    render();
   </script>
 </body>
 </html>
