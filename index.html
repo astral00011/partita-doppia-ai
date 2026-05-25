@@ -95,7 +95,6 @@
       <button id="resetBtn" class="red">Azzera tutto</button>
       <div id="status" class="muted" style="margin-top:10px;"></div>
     </div>
-
     <div class="grid">
       <div class="card">
         <h2>Analisi</h2>
@@ -106,18 +105,15 @@
         <div id="outputScrittura" class="box muted">Nessuna scrittura ancora.</div>
       </div>
     </div>
-
     <div class="card">
       <h2>Mastrini</h2>
       <div id="outputMastrini" class="muted">Nessun mastrino ancora.</div>
     </div>
-
     <div class="card">
       <h2>Giornate salvate</h2>
       <div id="outputGiornate" class="muted">Nessuna giornata salvata.</div>
     </div>
   </div>
-
   <script>
     const LS_KEY = 'ai_partita_doppia_esercizio_v5';
     const defaultState = { giornate: [], mastrini: {}, consegna: '' };
@@ -130,7 +126,6 @@
       localStorage.setItem(LS_KEY, JSON.stringify(state));
       render();
     }
-
     function addLedgerRow(conto, date, descrizione, dare, avere) {
       if (!state.mastrini[conto]) state.mastrini[conto] = [];
       const prev = state.mastrini[conto].length ? state.mastrini[conto][state.mastrini[conto].length - 1].saldo : 0;
@@ -143,13 +138,11 @@
         saldo: prev + delta
       });
     }
-
     function analyzeEntry(text) {
       const t = (text || '').toLowerCase();
       let type = 'generica';
       let lines = [];
       let explanation = 'Operazione non riconosciuta con sicurezza.';
-
       if (t.includes('acquisto') && t.includes('fattura')) {
         type = 'acquisto_fattura';
         lines = [
@@ -181,22 +174,18 @@
         ];
         explanation = 'Rilevato pagamento a fornitore: si riduce il debito e esce liquidità dalla banca.';
       }
-
       const balance = lines.reduce((s, r) => s + (r.lato === 'dare' ? r.importo : -r.importo), 0);
       return { type, lines, explanation, balanced: Math.abs(balance) < 0.01 };
     }
-
     function processDay() {
       const text = el('consegna').value.trim();
       if (!text) {
         el('status').innerHTML = '<span class="bad">Inserisci una consegna prima di analizzare.</span>';
         return;
       }
-
       const result = analyzeEntry(text);
       const day = new Date().toLocaleDateString('it-IT');
       const time = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-
       result.lines.forEach(line => {
         addLedgerRow(
           line.conto,
@@ -206,7 +195,6 @@
           line.lato === 'avere' ? line.importo : 0
         );
       });
-
       state.giornate.unshift({
          `${day} ${time}`,
         consegna: text,
@@ -215,17 +203,13 @@
         lines: result.lines
       });
       state.consegna = text;
-
       el('status').innerHTML = result.balanced
         ? '<span class="ok">Scrittura bilanciata e salvata.</span>'
         : '<span class="bad">Attenzione: scrittura non bilanciata.</span>';
-
       save();
     }
-
     function render() {
       el('consegna').value = state.consegna || '';
-
       const last = state.giornate[0];
       if (last) {
         el('outputAnalisi').textContent =
@@ -236,7 +220,6 @@
         el('outputAnalisi').textContent = 'Nessuna analisi ancora.';
         el('outputScrittura').textContent = 'Nessuna scrittura ancora.';
       }
-
       const ledgers = Object.keys(state.mastrini);
       if (!ledgers.length) {
         el('outputMastrini').innerHTML = 'Nessun mastrino ancora.';
@@ -272,7 +255,6 @@
           `;
         }).join('');
       }
-
       if (!state.giornate.length) {
         el('outputGiornate').textContent = 'Nessuna giornata salvata.';
       } else {
@@ -281,15 +263,12 @@
         ).join('');
       }
     }
-
     el('analizzaBtn').addEventListener('click', processDay);
-
     el('nuovaBtn').addEventListener('click', () => {
       el('consegna').value = '';
       state.consegna = '';
       save();
     });
-
     el('resetBtn').addEventListener('click', () => {
       if (!confirm('Vuoi azzerare tutto?')) return;
       state.giornate = [];
@@ -297,7 +276,6 @@
       state.consegna = '';
       save();
     });
-
     render();
   </script>
 </body>
