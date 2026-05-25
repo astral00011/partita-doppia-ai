@@ -42,7 +42,7 @@
     .hero h1{margin:0 0 8px;font-size:28px}
     .hero p{margin:0;color:var(--muted);line-height:1.4}
     .grid{display:grid;gap:16px}
-    @media (min-width: 980px){
+    @media (min-width:980px){
       .grid.top{grid-template-columns:1fr 1fr}
       .grid.bottom{grid-template-columns:1.2fr .8fr}
     }
@@ -74,12 +74,7 @@
       outline:none;
     }
     textarea:focus{border-color:var(--accent)}
-    .buttons{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:12px;
-    }
+    .buttons{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
     button{
       border:none;
       border-radius:12px;
@@ -88,7 +83,7 @@
       cursor:pointer;
       color:white;
       background:var(--accent);
-      transition:.15s transform, .15s opacity;
+      transition:.15s transform,.15s opacity;
     }
     button:hover{transform:translateY(-1px);opacity:.96}
     button.secondary{background:#4f5f81}
@@ -157,7 +152,7 @@
   <div class="wrap">
     <div class="hero">
       <h1>AI Partita Doppia</h1>
-      <p>Incolla una consegna, analizzala, genera la scrittura e aggiorna i mastrini. Questa versione riconosce meglio frasi naturali e importi con IVA.</p>
+      <p>Versione stabile con motore base funzionante, storicizzazione delle giornate e spazio pronto per collegare l’AI in futuro.</p>
     </div>
 
     <div class="grid top">
@@ -167,6 +162,7 @@
           <textarea id="consegna" placeholder="Esempio: Si acquista un mobile presso Ikea S.p.A. per € 1.500 + IVA 22% pagamento con rimessa diretta tramite banca."></textarea>
           <div class="buttons">
             <button id="analizzaBtn">Analizza consegna</button>
+            <button id="aiBtn" class="success">AI futura</button>
             <button id="nuovaBtn" class="secondary">Nuova giornata</button>
             <button id="resetBtn" class="danger">Azzera tutto</button>
           </div>
@@ -202,7 +198,7 @@
   </div>
 
   <script>
-    const LS_KEY = 'ai_partita_doppia_start_v2';
+    const LS_KEY = 'ai_partita_doppia_core_v1';
     const defaultState = { giornate: [], mastrini: {}, consegna: '' };
     const state = JSON.parse(localStorage.getItem(LS_KEY) || JSON.stringify(defaultState));
 
@@ -223,7 +219,7 @@
       const prev = rows.length ? rows[rows.length - 1].saldo : 0;
       const delta = (dare || 0) - (avere || 0);
       rows.push({
-        data: date,
+         date,
         descrizione,
         dare: dare || 0,
         avere: avere || 0,
@@ -231,108 +227,182 @@
       });
     }
 
+    function normalizeText(text){
+      return (text || '')
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .replace(/€/g, ' euro ')
+        .replace(/[\.,]/g, ' ');
+    }
+
     function extractAmount(text){
-      const cleaned = text.replace(/\s/g,'').replace(/€/g,'').replace(/\./g,'').replace(/,/g,'.');
-      const matches = [...cleaned.matchAll(/\d+(?:\.\d+)?/g)].map(m => Number(m[0]));
-      return matches.length ? matches[0] : 1000;
+      const t = normalizeText(text);
+      const matches = [...t.matchAll(/\b\d+(?:\s*\d{3})*(?:[.,]\d+)?\b/g)].map(m => {
+        const raw = m[0].replace(/\s/g,'').replace(/\./g,'').replace(/,/g,'.');
+        return Number(raw);
+      }).filter(n => Number.isFinite(n) && n > 0);
+      if (!matches.length) return 1000;
+      return matches.reduce((a,b) => b > a ? b : a, matches[0]);
     }
 
     function extractIvaRate(text){
-      const t = text.toLowerCase();
-      if (t.includes('22%') || (t.includes('iva') && t.includes('22'))) return 0.22;
-      if (t.includes('10%') || (t.includes('iva') && t.includes('10'))) return 0.10;
-      if (t.includes('4%') || (t.includes('iva') && t.includes('4'))) return 0.04;
+      const t = normalizeText(text);
+      if (t.includes('22')) return 0.22;
+      if (t.includes('10')) return 0.10;
+      if (t.includes('4')) return 0.04;
       return 0.22;
     }
 
-    function analyzeEntry(text){
-      const t = (text || '').toLowerCase();
+    function detectKeywords(t){
+      return {
+        acq: /acquist|compra|comprat|si compra/.test(t),
+        vend: /vendit|vende/.test(t),
+        fattura: t.includes('fattura'),
+        incasso: /incass|ricev/.test(t),
+        pagamento: /pagament|pagato|paga/.test(t),
+        banca: /banca|bonifico|rimessa diretta|tramite banca/.test(t),
+        fornitore: /fornit|ikea|fornitore/.test(t),
+        cliente: /client/.test(t),
+        mobile: /mobile|mobili/.test(t),
+        iva: t.includes('iva'),
+        personale: /stipend|salari|retribuz/.test(t),
+        bene: /immobil|arredo|attrezzat|cespite/.test(t)
+      };
+    }
 
+    function buildResult(type, lines, explanation, source){
+      const balance = lines.reduce((s, r) => s + (r.lato === 'dare' ? r.importo : -r.importo), 0);
+      return { type, lines, explanation, balanced: Math.abs(balance) < 0.01, source };
+    }
+
+    function localAnalyze(text){
+      const t = normalizeText(text);
+      const k = detectKeywords(t);
       const base = extractAmount(text);
       const rate = extractIvaRate(text);
-      const iva = t.includes('iva') ? Math.round(base * rate * 100) / 100 : 0;
+      const iva = k.iva ? Math.round(base * rate * 100) / 100 : 0;
       const total = Math.round((base + iva) * 100) / 100;
 
-      const hasAcq = t.includes('acquisto') || t.includes('acquista') || t.includes('si compra') || t.includes('compra');
-      const hasVend = t.includes('vendita') || t.includes('vende');
-      const hasFatt = t.includes('fattura');
-      const hasIncasso = t.includes('incasso') || t.includes('incassa');
-      const hasPagamento = t.includes('pagamento') || t.includes('paga') || t.includes('pagato');
-      const hasBanca = t.includes('banca') || t.includes('bonifico') || t.includes('rimessa diretta') || t.includes('tramite banca');
-      const hasFornit = t.includes('fornit');
-      const hasClient = t.includes('client');
-      const hasMobile = t.includes('mobile') || t.includes('mobili');
-      const hasIkea = t.includes('ikea');
-
-      let type = 'generica';
-      let lines = [];
-      let explanation = 'Operazione non riconosciuta con sicurezza.';
-
-      if (hasAcq && (hasMobile || hasIkea || hasFatt || hasBanca || hasPagamento)) {
-        type = 'acquisto_bene';
-        const contoDare = hasMobile ? 'Mobilizzazioni materiali' : 'Merci c/acquisti';
-        if (hasBanca || hasPagamento || t.includes('rimessa diretta')) {
-          lines = [
-            { conto: contoDare, lato: 'dare', importo: base },
-            { conto: 'IVA a credito', lato: 'dare', importo: iva },
-            { conto: 'Banca c/c', lato: 'avere', importo: total }
-          ];
-          explanation = `Rilevato acquisto pagato tramite banca: ${contoDare}, IVA a credito e uscita da banca.`;
-        } else if (hasFatt) {
-          lines = [
-            { conto: contoDare, lato: 'dare', importo: base },
-            { conto: 'IVA a credito', lato: 'dare', importo: iva },
-            { conto: 'Debiti v/fornitori', lato: 'avere', importo: total }
-          ];
-          explanation = `Rilevato acquisto con fattura: ${contoDare}, IVA a credito e debito verso fornitore.`;
-        } else {
-          lines = [
-            { conto: contoDare, lato: 'dare', importo: base },
-            { conto: 'Banca c/c', lato: 'avere', importo: total }
-          ];
-          explanation = `Rilevato acquisto pagato subito tramite banca.`;
+      if ((k.acq || k.mobile || k.bene || k.fornitore) && (k.banca || k.pagamento || k.fattura || k.iva)) {
+        const contoDare = k.mobile || k.bene ? 'Mobilizzazioni materiali' : 'Merci c/acquisti';
+        if (k.banca || /rimessa diretta/.test(t) || k.pagamento) {
+          return buildResult(
+            'acquisto_pagato_banca',
+            [
+              { conto: contoDare, lato: 'dare', importo: base },
+              { conto: 'IVA a credito', lato: 'dare', importo: iva },
+              { conto: 'Banca c/c', lato: 'avere', importo: total }
+            ],
+            `Rilevato acquisto pagato tramite banca: ${contoDare}, IVA a credito e uscita da banca.`,
+            'base'
+          );
         }
-      } else if (hasVend && hasFatt) {
-        type = 'vendita_fattura';
-        lines = [
-          { conto: 'Crediti v/clienti', lato: 'dare', importo: total },
-          { conto: 'Ricavi vendite', lato: 'avere', importo: base },
-          { conto: 'IVA a debito', lato: 'avere', importo: iva }
-        ];
-        explanation = 'Rilevata vendita con fattura: credito verso cliente, ricavo e IVA a debito.';
-      } else if (hasIncasso && hasClient) {
-        type = 'incasso_cliente';
-        lines = [
-          { conto: 'Banca c/c', lato: 'dare', importo: base },
-          { conto: 'Crediti v/clienti', lato: 'avere', importo: base }
-        ];
-        explanation = 'Rilevato incasso da cliente: aumenta la banca e si riduce il credito verso cliente.';
-      } else if (hasPagamento && hasFornit) {
-        type = 'pagamento_fornitore';
-        lines = [
-          { conto: 'Debiti v/fornitori', lato: 'dare', importo: base },
-          { conto: 'Banca c/c', lato: 'avere', importo: base }
-        ];
-        explanation = 'Rilevato pagamento a fornitore: si riduce il debito e esce liquidità dalla banca.';
-      } else if (hasBanca && hasAcq) {
-        type = 'acquisto_pagato_banca';
-        lines = [
-          { conto: hasMobile ? 'Mobilizzazioni materiali' : 'Merci c/acquisti', lato: 'dare', importo: base },
-          { conto: 'IVA a credito', lato: 'dare', importo: iva },
-          { conto: 'Banca c/c', lato: 'avere', importo: total }
-        ];
-        explanation = 'Rilevato acquisto con pagamento tramite banca.';
-      } else if (t.includes('stipend') || t.includes('salari')) {
-        type = 'personale';
-        lines = [
-          { conto: 'Costi per il personale', lato: 'dare', importo: base },
-          { conto: 'Debiti v/personale', lato: 'avere', importo: base }
-        ];
-        explanation = 'Rilevato costo per il personale.';
+        if (k.fattura) {
+          return buildResult(
+            'acquisto_fattura',
+            [
+              { conto: contoDare, lato: 'dare', importo: base },
+              { conto: 'IVA a credito', lato: 'dare', importo: iva },
+              { conto: 'Debiti v/fornitori', lato: 'avere', importo: total }
+            ],
+            `Rilevato acquisto con fattura: ${contoDare}, IVA a credito e debito verso fornitore.`,
+            'base'
+          );
+        }
       }
 
-      const balance = lines.reduce((s, r) => s + (r.lato === 'dare' ? r.importo : -r.importo), 0);
-      return { type, lines, explanation, balanced: Math.abs(balance) < 0.01 };
+      if (k.vend && k.fattura) {
+        return buildResult(
+          'vendita_fattura',
+          [
+            { conto: 'Crediti v/clienti', lato: 'dare', importo: total },
+            { conto: 'Ricavi vendite', lato: 'avere', importo: base },
+            { conto: 'IVA a debito', lato: 'avere', importo: iva }
+          ],
+          'Rilevata vendita con fattura: credito verso cliente, ricavo e IVA a debito.',
+          'base'
+        );
+      }
+
+      if (k.incasso && k.client) {
+        return buildResult(
+          'incasso_cliente',
+          [
+            { conto: 'Banca c/c', lato: 'dare', importo: base },
+            { conto: 'Crediti v/clienti', lato: 'avere', importo: base }
+          ],
+          'Rilevato incasso da cliente: aumenta la banca e si riduce il credito verso cliente.',
+          'base'
+        );
+      }
+
+      if (k.pagamento && k.fornitore) {
+        return buildResult(
+          'pagamento_fornitore',
+          [
+            { conto: 'Debiti v/fornitori', lato: 'dare', importo: base },
+            { conto: 'Banca c/c', lato: 'avere', importo: base }
+          ],
+          'Rilevato pagamento a fornitore: si riduce il debito e esce liquidità dalla banca.',
+          'base'
+        );
+      }
+
+      if (k.personale) {
+        return buildResult(
+          'personale',
+          [
+            { conto: 'Costi per il personale', lato: 'dare', importo: base },
+            { conto: 'Debiti v/personale', lato: 'avere', importo: base }
+          ],
+          'Rilevato costo per il personale.',
+          'base'
+        );
+      }
+
+      return buildResult(
+        'generica',
+        [],
+        'Operazione generica: il motore base non è riuscito a riconoscere con sicurezza la consegna.',
+        'base'
+      );
+    }
+
+    function analyzeEntry(text){
+      return localAnalyze(text);
+    }
+
+    function processResult(text, result){
+      const day = new Date().toLocaleDateString('it-IT');
+      const time = new Date().toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
+
+      if (result.lines && result.lines.length) {
+        result.lines.forEach(line => {
+          addLedgerRow(
+            line.conto,
+            day,
+            text,
+            line.lato === 'dare' ? line.importo : 0,
+            line.lato === 'avere' ? line.importo : 0
+          );
+        });
+      }
+
+      state.giornate.unshift({
+         `${day} ${time}`,
+        consegna: text,
+        type: result.type,
+        explanation: result.explanation,
+        lines: result.lines || [],
+        source: result.source || 'base'
+      });
+      state.consegna = text;
+
+      el('status').innerHTML = result.balanced
+        ? `<span class="ok">Scrittura bilanciata e salvata. Motore: ${result.source || 'base'}.</span>`
+        : `<span class="bad">Attenzione: scrittura non bilanciata o operazione generica. Motore: ${result.source || 'base'}.</span>`;
+
+      save();
     }
 
     function processDay(){
@@ -341,35 +411,7 @@
         el('status').innerHTML = '<span class="bad">Inserisci una consegna prima di analizzare.</span>';
         return;
       }
-
-      const result = analyzeEntry(text);
-      const day = new Date().toLocaleDateString('it-IT');
-      const time = new Date().toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
-
-      result.lines.forEach(line => {
-        addLedgerRow(
-          line.conto,
-          day,
-          text,
-          line.lato === 'dare' ? line.importo : 0,
-          line.lato === 'avere' ? line.importo : 0
-        );
-      });
-
-      state.giornate.unshift({
-        data: `${day} ${time}`,
-        consegna: text,
-        type: result.type,
-        explanation: result.explanation,
-        lines: result.lines
-      });
-      state.consegna = text;
-
-      el('status').innerHTML = result.balanced
-        ? '<span class="ok">Scrittura bilanciata e salvata.</span>'
-        : '<span class="bad">Attenzione: scrittura non bilanciata.</span>';
-
-      save();
+      processResult(text, analyzeEntry(text));
     }
 
     function render(){
@@ -377,8 +419,10 @@
 
       const last = state.giornate[0];
       if(last){
-        el('outputAnalisi').textContent = `Tipo: ${last.type}\n\nSpiegazione:\n${last.explanation}`;
-        el('outputScrittura').textContent = last.lines.map(l => `${l.lato.toUpperCase()} | ${l.conto} | ${money(l.importo)}`).join('\n');
+        el('outputAnalisi').textContent = `Tipo: ${last.type}\nFonte: ${last.source}\n\nSpiegazione:\n${last.explanation}`;
+        el('outputScrittura').textContent = last.lines.length
+          ? last.lines.map(l => `${l.lato.toUpperCase()} | ${l.conto} | ${money(l.importo)}`).join('\n')
+          : 'Nessuna scrittura generata.';
       } else {
         el('outputAnalisi').textContent = 'Nessuna analisi ancora.';
         el('outputScrittura').textContent = 'Nessuna scrittura ancora.';
@@ -437,6 +481,10 @@
     }
 
     el('analizzaBtn').addEventListener('click', processDay);
+
+    el('aiBtn').addEventListener('click', () => {
+      el('status').innerHTML = '<span class="warn">AI non ancora collegata. La struttura è pronta.</span>';
+    });
 
     el('nuovaBtn').addEventListener('click', () => {
       el('consegna').value = '';
