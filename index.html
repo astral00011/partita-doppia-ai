@@ -148,7 +148,7 @@
   <div class="wrap">
     <div class="hero">
       <h1>AI Partita Doppia</h1>
-      <p>Incolla una consegna, analizzala, genera la scrittura e aggiorna i mastrini. La pagina è già pronta per ospitare l’AI in futuro.</p>
+      <p>Versione stabile con motore base funzionante, storicizzazione delle giornate e spazio pronto per collegare l’AI in futuro.</p>
     </div>
 
     <div class="grid top">
@@ -158,7 +158,7 @@
           <textarea id="consegna" placeholder="Esempio: Si acquista un mobile presso Ikea S.p.A. per € 1.500 + IVA 22% pagamento con rimessa diretta tramite banca."></textarea>
           <div class="buttons">
             <button id="analizzaBtn">Analizza consegna</button>
-            <button id="aiBtn" class="success">Analisi AI (futuro)</button>
+            <button id="aiBtn" class="success">AI futura</button>
             <button id="nuovaBtn" class="secondary">Nuova giornata</button>
             <button id="resetBtn" class="danger">Azzera tutto</button>
           </div>
@@ -194,7 +194,7 @@
   </div>
 
   <script>
-    const LS_KEY = 'ai_partita_doppia_start_v3';
+    const LS_KEY = 'ai_partita_doppia_core_v1';
     const defaultState = { giornate: [], mastrini: {}, consegna: '' };
     const state = JSON.parse(localStorage.getItem(LS_KEY) || JSON.stringify(defaultState));
 
@@ -320,7 +320,7 @@
         );
       }
 
-      if (k.incasso && k.cliente) {
+      if (k.incasso && k.client) {
         return buildResult(
           'incasso_cliente',
           [
@@ -368,10 +368,6 @@
       return localAnalyze(text);
     }
 
-    async function aiAnalyze(text){
-      return null;
-    }
-
     function processResult(text, result){
       const day = new Date().toLocaleDateString('it-IT');
       const time = new Date().toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
@@ -411,19 +407,7 @@
         el('status').innerHTML = '<span class="bad">Inserisci una consegna prima di analizzare.</span>';
         return;
       }
-      const result = analyzeEntry(text);
-      processResult(text, result);
-    }
-
-    async function processAiDay(){
-      const text = el('consegna').value.trim();
-      if(!text){
-        el('status').innerHTML = '<span class="bad">Inserisci una consegna prima di analizzare.</span>';
-        return;
-      }
-      const aiResult = await aiAnalyze(text);
-      const result = aiResult || analyzeEntry(text);
-      processResult(text, result);
+      processResult(text, analyzeEntry(text));
     }
 
     function render(){
@@ -493,7 +477,9 @@
     }
 
     el('analizzaBtn').addEventListener('click', processDay);
-    el('aiBtn').addEventListener('click', processAiDay);
+    el('aiBtn').addEventListener('click', () => {
+      el('status').innerHTML = '<span class="warn">AI non ancora collegata. La struttura è pronta.</span>';
+    });
 
     el('nuovaBtn').addEventListener('click', () => {
       el('consegna').value = '';
