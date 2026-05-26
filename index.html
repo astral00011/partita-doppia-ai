@@ -32,7 +32,7 @@ table{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px} th,td{
 <div class="wrap">
   <div class="hero">
     <h1>AI Partita Doppia</h1>
-    <p>Scrivi la consegna, fai analizzare la parte base oppure usa l’AI collegata al backend.</p>
+    <p>Scrivi la consegna e premi un solo tasto: l’app analizza, prepara la scrittura e usa l’AI.</p>
   </div>
 
   <div class="grid top">
@@ -41,8 +41,7 @@ table{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px} th,td{
       <div class="body">
         <textarea id="consegna" placeholder="Esempio: Si acquista un mobile presso Ikea S.p.A. per € 1.500 + IVA 22% pagamento con rimessa diretta tramite banca."></textarea>
         <div class="buttons">
-          <button id="analizzaBtn" type="button">Analizza consegna</button>
-          <button id="aiBtn" type="button" class="success">Usa AI</button>
+          <button id="analizzaAiBtn" type="button" class="success">Analizza con AI</button>
           <button id="nuovaBtn" type="button" class="secondary">Nuova giornata</button>
           <button id="resetBtn" type="button" class="danger">Azzera tutto</button>
         </div>
@@ -74,7 +73,7 @@ table{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px} th,td{
 
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
-  const LS_KEY='ai_partita_doppia_core_v1';
+  const LS_KEY='ai_partita_doppia_core_v2';
   const defaultState={giornate:[],mastrini:{},consegna:''};
   const state=JSON.parse(localStorage.getItem(LS_KEY)||JSON.stringify(defaultState));
   const el=id=>document.getElementById(id);
@@ -158,7 +157,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
 
   async function callAI(prompt){
-    const res = await fetch('https://TUO-SITO-NETLIFY.netlify.app/.netlify/functions/ai', {
+    const res = await fetch('/.netlify/functions/ai', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ prompt })
@@ -179,29 +178,25 @@ document.addEventListener('DOMContentLoaded',()=>{
     save();
   }
 
-  async function processAiDay(){
+  async function analyzeWithAI(){
     const text=el('consegna').value.trim();
-    if(!text){ el('status').innerHTML='<span class="bad">Inserisci una consegna prima di usare l’AI.</span>'; return; }
-    el('status').innerHTML='<span class="warn">Sto interrogando l’AI...</span>';
+    if(!text){ el('status').innerHTML='<span class="bad">Inserisci una consegna prima di analizzare.</span>'; return; }
+    el('status').innerHTML='<span class="warn">Sto analizzando con AI...</span>';
+    const local = localAnalyze(text);
+    processResult(text, local);
     try{
       const ai = await callAI(text);
       const result = {
         type: ai.type || 'ai',
-        lines: ai.lines || [],
-        explanation: ai.explanation || 'Risposta AI ricevuta.',
+        lines: Array.isArray(ai.lines) ? ai.lines : local.lines,
+        explanation: ai.explanation || local.explanation,
         balanced: true,
         source: 'ai'
       };
       processResult(text, result);
     }catch(e){
-      el('status').innerHTML='<span class="bad">AI non disponibile. Controlla il backend.</span>';
+      el('status').innerHTML='<span class="bad">AI non disponibile. Ho salvato l’analisi base.</span>';
     }
-  }
-
-  function processDay(){
-    const text=el('consegna').value.trim();
-    if(!text){ el('status').innerHTML='<span class="bad">Inserisci una consegna prima di analizzare.</span>'; return; }
-    processResult(text, localAnalyze(text));
   }
 
   function render(){
@@ -224,13 +219,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     el('outputGiornate').innerHTML=!state.giornate.length?'<span class="muted">Nessuna giornata salvata.</span>':state.giornate.map(g=>`<div class="day"><strong>${g.data}</strong><div class="small warn">${g.type}</div><div class="small" style="margin-top:6px">${g.consegna}</div></div>`).join('');
   }
 
-  el('analizzaBtn').addEventListener('click',processDay);
-  el('aiBtn').addEventListener('click',processAiDay);
+  el('analizzaAiBtn').addEventListener('click',analyzeWithAI);
   el('nuovaBtn').addEventListener('click',()=>{el('consegna').value=''; state.consegna=''; save();});
-  el('resetBtn').addEventListener('click',()=>{
-    if(!confirm('Vuoi azzerare tutto?')) return;
-    state.giornate=[]; state.mastrini={}; state.consegna=''; save();
-  });
+  el('resetBtn').addEventListener('click',()=>{if(!confirm('Vuoi azzerare tutto?')) return; state.giornate=[]; state.mastrini={}; state.consegna=''; save();});
 
   render();
 });
