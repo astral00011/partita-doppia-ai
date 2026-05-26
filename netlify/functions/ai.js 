@@ -36,7 +36,7 @@ exports.handler = async (event) => {
         messages: [
           {
             role: "system",
-            content: "Sei un assistente di partita doppia. Rispondi solo in JSON valido con campi: type, explanation, lines. lines deve essere un array di oggetti con conto, lato, importo."
+            content: "Sei un assistente di partita doppia. Rispondi solo in JSON valido con campi: type, explanation, lines."
           },
           {
             role: "user",
@@ -53,24 +53,16 @@ exports.handler = async (event) => {
       return {
         statusCode: response.status,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          error: "OpenAI error",
-          details: data
-        })
+        body: JSON.stringify({ error: "OpenAI error", details: data })
       };
     }
 
     const content = data?.choices?.[0]?.message?.content || "";
     let parsed;
-
     try {
       parsed = JSON.parse(content);
     } catch {
-      parsed = {
-        type: "ai",
-        explanation: content || "Risposta AI ricevuta.",
-        lines: []
-      };
+      parsed = { type: "ai", explanation: content || "Risposta AI ricevuta.", lines: [] };
     }
 
     return {
