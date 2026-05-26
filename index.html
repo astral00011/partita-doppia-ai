@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     status.textContent = 'Invio alla funzione AI...';
 
     try {
-      const res = await fetch('/.netlify/functions/ai', {
+      const res = await fetch('https://partitadoppia.netlify.app/.netlify/functions/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: text })
