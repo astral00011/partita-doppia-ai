@@ -32,7 +32,7 @@ table{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px} th,td{
 <div class="wrap">
   <div class="hero">
     <h1>AI Partita Doppia</h1>
-    <p>Scrivi la consegna e premi un solo tasto: l’app analizza, prepara la scrittura e usa l’AI.</p>
+    <p>Scrivi la consegna e usa un solo tasto per analizzarla con AI.</p>
   </div>
 
   <div class="grid top">
@@ -73,26 +73,53 @@ table{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px} th,td{
 
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
-  const LS_KEY='ai_partita_doppia_core_v2';
-  const defaultState={giornate:[],mastrini:{},consegna:''};
-  const state=JSON.parse(localStorage.getItem(LS_KEY)||JSON.stringify(defaultState));
+  const LS_KEY='ai_partita_doppia_core_v3';
   const el=id=>document.getElementById(id);
-  const money=n=>(Math.round((n||0)*100)/100).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
+  let state=loadState();
 
-  function save(){localStorage.setItem(LS_KEY,JSON.stringify(state));render();}
-  function addLedgerRow(conto,date,descrizione,dare,avere){
-    if(!state.mastrini[conto])state.mastrini[conto]=[];
-    const rows=state.mastrini[conto];
-    const prev=rows.length?rows[rows.length-1].saldo:0;
-    rows.push({date,descrizione,dare:dare||0,avere:avere||0,saldo:prev+(dare||0)-(avere||0)});
+  function loadState(){
+    try{
+      return JSON.parse(localStorage.getItem(LS_KEY)) || {giornate:[],mastrini:{},consegna:''};
+    }catch{
+      return {giornate:[],mastrini:{},consegna:''};
+    }
   }
-  function normalizeText(text){return (text||'').toLowerCase().replace(/\s+/g,' ').replace(/€/g,' euro ').replace(/[\\.,]/g,' ')}
+
+  function saveState(){
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+    render();
+  }
+
+  function clearAllData(){
+    localStorage.removeItem(LS_KEY);
+    state={giornate:[],mastrini:{},consegna:''};
+    render();
+  }
+
+  function money(n){
+    return (Math.round((n||0)*100)/100).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
+
+  function normalizeText(text){
+    return (text||'').toLowerCase().replace(/\s+/g,' ').replace(/€/g,' euro ').replace(/[\\.,]/g,' ');
+  }
+
   function extractAmount(text){
     const t=normalizeText(text);
-    const m=[...t.matchAll(/\\b\\d+(?:\\s*\\d{3})*(?:[.,]\\d+)?\\b/g)].map(x=>Number(x[0].replace(/\\s/g,'').replace(/\\./g,'').replace(/,/g,'.'))).filter(n=>Number.isFinite(n)&&n>0);
+    const m=[...t.matchAll(/\\b\\d+(?:\\s*\\d{3})*(?:[.,]\\d+)?\\b/g)]
+      .map(x=>Number(x[0].replace(/\\s/g,'').replace(/\\./g,'').replace(/,/g,'.')))
+      .filter(n=>Number.isFinite(n)&&n>0);
     return m.length?m.reduce((a,b)=>b>a?b:a,m[0]):1000;
   }
-  function extractIvaRate(text){const t=normalizeText(text);if(t.includes('22'))return .22;if(t.includes('10'))return .10;if(t.includes('4'))return .04;return .22}
+
+  function extractIvaRate(text){
+    const t=normalizeText(text);
+    if(t.includes('22')) return .22;
+    if(t.includes('10')) return .10;
+    if(t.includes('4')) return .04;
+    return .22;
+  }
+
   function detectKeywords(t){
     return{
       acq:/acquist|compra|comprat|si compra/.test(t),
@@ -107,14 +134,22 @@ document.addEventListener('DOMContentLoaded',()=>{
       iva:t.includes('iva'),
       personale:/stipend|salari|retribuz/.test(t),
       bene:/immobil|arredo|attrezzat|cespite/.test(t)
-    }
+    };
   }
+
   function buildResult(type,lines,explanation,source){
     const balance=lines.reduce((s,r)=>s+(r.lato==='dare'?r.importo:-r.importo),0);
-    return{type,lines,explanation,balanced:Math.abs(balance)<0.01,source}
+    return{type,lines,explanation,balanced:Math.abs(balance)<0.01,source};
   }
+
   function localAnalyze(text){
-    const t=normalizeText(text); const k=detectKeywords(t); const base=extractAmount(text); const rate=extractIvaRate(text); const iva=k.iva?Math.round(base*rate*100)/100:0; const total=Math.round((base+iva)*100)/100;
+    const t=normalizeText(text);
+    const k=detectKeywords(t);
+    const base=extractAmount(text);
+    const rate=extractIvaRate(text);
+    const iva=k.iva?Math.round(base*rate*100)/100:0;
+    const total=Math.round((base+iva)*100)/100;
+
     if((k.acq||k.mobile||k.bene||k.fornitore)&&(k.banca||k.pagamento||k.fattura||k.iva)){
       const contoDare=k.mobile||k.bene?'Mobilizzazioni materiali':'Merci c/acquisti';
       if(k.banca||/rimessa diretta/.test(t)||k.pagamento){
@@ -122,16 +157,17 @@ document.addEventListener('DOMContentLoaded',()=>{
           {conto:contoDare,lato:'dare',importo:base},
           {conto:'IVA a credito',lato:'dare',importo:iva},
           {conto:'Banca c/c',lato:'avere',importo:total}
-        ],`Rilevato acquisto pagato tramite banca: ${contoDare}, IVA a credito e uscita da banca.`,'base')
+        ],`Rilevato acquisto pagato tramite banca: ${contoDare}, IVA a credito e uscita da banca.`,'base');
       }
       if(k.fattura){
         return buildResult('acquisto_fattura',[
           {conto:contoDare,lato:'dare',importo:base},
           {conto:'IVA a credito',lato:'dare',importo:iva},
           {conto:'Debiti v/fornitori',lato:'avere',importo:total}
-        ],`Rilevato acquisto con fattura: ${contoDare}, IVA a credito e debito verso fornitore.`,'base')
+        ],`Rilevato acquisto con fattura: ${contoDare}, IVA a credito e debito verso fornitore.`,'base');
       }
     }
+
     if(k.vend&&k.fattura) return buildResult('vendita_fattura',[
       {conto:'Crediti v/clienti',lato:'dare',importo:total},
       {conto:'Ricavi vendite',lato:'avere',importo:base},
@@ -157,13 +193,20 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
 
   async function callAI(prompt){
-    const res = await fetch('/.netlify/functions/ai', {
+    const res=await fetch('/.netlify/functions/ai',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ prompt })
+      body:JSON.stringify({prompt})
     });
     if(!res.ok) throw new Error('Errore chiamata AI');
     return await res.json();
+  }
+
+  function addLedgerRow(conto,date,descrizione,dare,avere){
+    if(!state.mastrini[conto]) state.mastrini[conto]=[];
+    const rows=state.mastrini[conto];
+    const prev=rows.length?rows[rows.length-1].saldo:0;
+    rows.push({date,descrizione,dare:dare||0,avere:avere||0,saldo:prev+(dare||0)-(avere||0)});
   }
 
   function processResult(text,result){
@@ -175,25 +218,28 @@ document.addEventListener('DOMContentLoaded',()=>{
     state.giornate.unshift({`${day} ${time}`,consegna:text,type:result.type,explanation:result.explanation,lines:result.lines||[],source:result.source||'base'});
     state.consegna=text;
     el('status').innerHTML=result.balanced?`<span class="ok">Scrittura bilanciata e salvata. Motore: ${result.source||'base'}.</span>`:`<span class="bad">Attenzione: scrittura non bilanciata o operazione generica. Motore: ${result.source||'base'}.</span>`;
-    save();
+    saveState();
   }
 
   async function analyzeWithAI(){
     const text=el('consegna').value.trim();
-    if(!text){ el('status').innerHTML='<span class="bad">Inserisci una consegna prima di analizzare.</span>'; return; }
+    if(!text){
+      el('status').innerHTML='<span class="bad">Inserisci una consegna prima di analizzare.</span>';
+      return;
+    }
     el('status').innerHTML='<span class="warn">Sto analizzando con AI...</span>';
-    const local = localAnalyze(text);
-    processResult(text, local);
+    const local=localAnalyze(text);
+    processResult(text,local);
     try{
-      const ai = await callAI(text);
-      const result = {
+      const ai=await callAI(text);
+      const result={
         type: ai.type || 'ai',
         lines: Array.isArray(ai.lines) ? ai.lines : local.lines,
         explanation: ai.explanation || local.explanation,
         balanced: true,
         source: 'ai'
       };
-      processResult(text, result);
+      processResult(text,result);
     }catch(e){
       el('status').innerHTML='<span class="bad">AI non disponibile. Ho salvato l’analisi base.</span>';
     }
@@ -209,6 +255,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       el('outputAnalisi').textContent='Nessuna analisi ancora.';
       el('outputScrittura').textContent='Nessuna scrittura ancora.';
     }
+
     const ledgers=Object.keys(state.mastrini);
     el('outputMastrini').innerHTML=!ledgers.length?'<span class="muted">Nessun mastrino ancora.</span>':ledgers.map(conto=>{
       const rows=state.mastrini[conto];
@@ -216,12 +263,20 @@ document.addEventListener('DOMContentLoaded',()=>{
       const tableRows=rows.map(r=>`<tr><td>${r.data}</td><td>${r.descrizione}</td><td>${money(r.dare)}</td><td>${money(r.avere)}</td><td>${money(r.saldo)}</td></tr>`).join('');
       return `<div class="day"><strong>${conto}</strong><div class="small muted">Saldo attuale: ${money(lastSaldo)}</div><div class="ledger-wrap"><table><thead><tr><th>Data</th><th>Descrizione</th><th>Dare</th><th>Avere</th><th>Saldo</th></tr></thead><tbody>${tableRows}</tbody></table></div></div>`;
     }).join('');
+
     el('outputGiornate').innerHTML=!state.giornate.length?'<span class="muted">Nessuna giornata salvata.</span>':state.giornate.map(g=>`<div class="day"><strong>${g.data}</strong><div class="small warn">${g.type}</div><div class="small" style="margin-top:6px">${g.consegna}</div></div>`).join('');
   }
 
   el('analizzaAiBtn').addEventListener('click',analyzeWithAI);
-  el('nuovaBtn').addEventListener('click',()=>{el('consegna').value=''; state.consegna=''; save();});
-  el('resetBtn').addEventListener('click',()=>{if(!confirm('Vuoi azzerare tutto?')) return; state.giornate=[]; state.mastrini={}; state.consegna=''; save();});
+
+  el('nuovaBtn').addEventListener('click',()=>{
+    el('consegna').value='';
+  });
+
+  el('resetBtn').addEventListener('click',()=>{
+    if(!confirm('Vuoi azzerare tutto?')) return;
+    clearAllData();
+  });
 
   render();
 });
