@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     status.textContent = 'Invio alla funzione AI...';
 
     try {
-      const res = await fetch('/.netlify/functions/ai', {
+      const res = await fetch('/.netlify/functions/ping', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: text })
