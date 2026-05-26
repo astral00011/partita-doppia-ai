@@ -1,21 +1,10 @@
 exports.handler = async () => {
-  try {
-    return {
-      statusCode: 200,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ok: true,
-        message: "AI function reached successfully"
-      })
-    };
-  } catch (err) {
-    return {
-      statusCode: 500,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ok: false,
-        error: err.message || "Unknown error"
-      })
-    };
-  }
+  return {
+    statusCode: 200,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ok: true,
+      message: "AI function reached successfully"
+    })
+  };
 };
