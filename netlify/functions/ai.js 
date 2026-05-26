@@ -1,10 +1,17 @@
 exports.handler = async (event) => {
   try {
-    const { prompt } = JSON.parse(event.body || "{}");
+    let body = {};
+    try {
+      body = JSON.parse(event.body || "{}");
+    } catch {
+      body = {};
+    }
 
-    if (!prompt) {
+    const prompt = body.prompt || "";
+    if (!prompt.trim()) {
       return {
         statusCode: 400,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ error: "Prompt mancante" })
       };
     }
@@ -13,6 +20,7 @@ exports.handler = async (event) => {
     if (!apiKey) {
       return {
         statusCode: 500,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ error: "OPENAI_API_KEY non configurata" })
       };
     }
@@ -28,7 +36,7 @@ exports.handler = async (event) => {
         messages: [
           {
             role: "system",
-            content: "Sei un assistente di partita doppia. Rispondi in JSON con campi: type, explanation, lines. lines deve essere un array di oggetti con conto, lato, importo."
+            content: "Sei un assistente di partita doppia. Rispondi solo in JSON valido con campi: type, explanation, lines. lines deve essere un array di oggetti con conto, lato, importo."
           },
           {
             role: "user",
@@ -40,9 +48,21 @@ exports.handler = async (event) => {
     });
 
     const data = await response.json();
-    const content = data?.choices?.[0]?.message?.content || "";
 
+    if (!response.ok) {
+      return {
+        statusCode: response.status,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          error: "OpenAI error",
+          details: data
+        })
+      };
+    }
+
+    const content = data?.choices?.[0]?.message?.content || "";
     let parsed;
+
     try {
       parsed = JSON.parse(content);
     } catch {
@@ -55,11 +75,13 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(parsed)
     };
   } catch (err) {
     return {
       statusCode: 500,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ error: err.message || "Errore AI" })
     };
   }
