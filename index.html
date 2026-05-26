@@ -51,7 +51,8 @@ document.addEventListener('DOMContentLoaded', () => {
       status.textContent = 'Inserisci prima un testo nella consegna.';
       return;
     }
-    status.textContent = 'Pulsante Analizza con AI cliccato. Testo letto: ' + text;
+
+    status.textContent = 'Invio alla funzione AI...';
 
     try {
       const res = await fetch('/.netlify/functions/ai', {
@@ -60,11 +61,10 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ prompt: text })
       });
 
-      if (!res.ok) throw new Error('Errore chiamata AI');
-      const data = await res.json();
-      status.textContent = 'AI risponde: ' + JSON.stringify(data);
+      const raw = await res.text();
+      status.textContent = `HTTP ${res.status} - ${raw}`;
     } catch (e) {
-      status.textContent = 'Il pulsante funziona, ma la funzione AI non risponde: ' + e.message;
+      status.textContent = 'Errore di rete: ' + e.message;
     }
 
     render();
